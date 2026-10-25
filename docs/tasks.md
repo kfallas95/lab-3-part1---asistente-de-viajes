@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión** | 1.1 |
+| **Versión** | 1.2 |
 | **Fecha** | 2026-10-24 |
 | **Fuentes** | `docs/requirements.md` · `docs/design.md` · `docs/data-contract.json` · `docs/wireframe.md` · `CLAUDE.md` |
 | **Verificación** | Manual, sin pruebas automatizadas (D-112). Cada fase termina con su lista de verificación. |
@@ -22,9 +22,9 @@
 
 ## Fase 0 — Esqueleto del proyecto
 
-- [ ] **T-0.1** `index.html` que carga `src/main.js` con `type="module"` (D-113).
-- [ ] **T-0.2** Carpetas de design §4: `domain/`, `application/`, `infrastructure/`, `state/` y `ui/{screens,components}`.
-- [ ] **T-0.3** `styles.css` mobile-first con variables de color (paleta verde/crema), títulos serif y tarjetas redondeadas (D-005, D-060).
+- [x] **T-0.1** `index.html` que carga `src/main.js` con `type="module"` (D-113).
+- [x] **T-0.2** Carpetas de design §4: `domain/`, `application/`, `infrastructure/`, `state/` y `ui/{screens,components}`.
+- [x] **T-0.3** `styles.css` mobile-first con variables de color (paleta verde/crema), títulos serif y tarjetas redondeadas (D-005, D-060).
 
 **Verificación:** Live Server abre la página y la consola no muestra errores.
 
@@ -34,21 +34,21 @@
 
 No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
-- [ ] **T-1.1** `types.js`: `TripStatus`, `ExpenseCategory` y sus etiquetas en español (D-019, D-038).
-- [ ] **T-1.2** `money.js`: `toCents(dollars)` con redondeo ½↑ (INV-25, D-121) y `formatMoney(cents)` → `"$1 234.50"`. Todo es USD; no hay conversión (D-120).
-- [ ] **T-1.3** `dates.js`: parseo **local** de `YYYY-MM-DD`, `totalDays`, `dayNumber` (derivado, D-117), `addDays`, `isWithin`, `overlaps` (INV-04, INV-29).
+- [x] **T-1.1** `types.js`: `TripStatus`, `ExpenseCategory` y sus etiquetas en español (D-019, D-038).
+- [x] **T-1.2** `money.js`: `toCents(dollars)` con redondeo ½↑ (INV-25, D-121) y `formatMoney(cents)` → `"$1 234.50"`. Todo es USD; no hay conversión (D-120).
+- [x] **T-1.3** `dates.js`: parseo **local** de `YYYY-MM-DD`, `totalDays`, `dayNumber` (derivado, D-117), `addDays`, `isWithin`, `overlaps` (INV-04, INV-29).
   - ⚠️ `new Date("2026-11-05")` se interpreta como UTC. En Costa Rica (UTC-6) eso da el día anterior. Usar siempre `new Date(y, m − 1, d)`.
-- [ ] **T-1.4** `tripStatus.js`: `statusFor(trip, today)` (D-032, D-100).
-- [ ] **T-1.5** `budgetCalculator.js`:
+- [x] **T-1.4** `tripStatus.js`: `statusFor(trip, today)` (D-032, D-100).
+- [x] **T-1.5** `budgetCalculator.js`:
   - `totalAmount` (D-115);
   - `dailyLimit` y `dailyRemaining` (D-007, INV-10, INV-12);
   - `totalAvailableToday`, `totalTripSpent` (INV-20), `reserveRemaining` (INV-13);
   - `plannedActivitiesTotal` (INV-24);
   - `isOverBudget`.
-- [ ] **T-1.6** `validators.js`: obligatorios (INV-02), montos > 0 (INV-01, INV-17), fechas (REQ-F-05, INV-28, INV-29), fecha del gasto (D-055), actividades (INV-21, INV-22, D-076).
-- [ ] **T-1.7** `confirmationReasons.js`: tope, disponible de hoy < 0, fondo < 0, categoría por debajo de lo gastado (INV-15). Impacto neto al editar (8.4).
-- [ ] **T-1.8** `forecastMessage.js`: plantilla de 8.8 (D-083).
-- [ ] **T-1.9** `ports.js`: contratos JSDoc de los repositorios, `Clock`, `NotificationPort` e `IdGenerator` (design §2.2).
+- [x] **T-1.6** `validators.js`: obligatorios (INV-02), montos > 0 (INV-01, INV-17), fechas (REQ-F-05, INV-28, INV-29), fecha del gasto (D-055), actividades (INV-21, INV-22, D-076).
+- [x] **T-1.7** `confirmationReasons.js`: tope, disponible de hoy < 0, fondo < 0, categoría por debajo de lo gastado (INV-15). Impacto neto al editar (8.4).
+- [x] **T-1.8** `forecastMessage.js`: plantilla de 8.8 (D-083).
+- [x] **T-1.9** `ports.js`: contratos JSDoc de los repositorios, `Clock`, `NotificationPort` e `IdGenerator` (design §2.2).
 
 **Comportamiento sin cambios:**
 
@@ -71,11 +71,11 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 2 — Infraestructura (`src/infrastructure/`)
 
-- [ ] **T-2.1** `storage.js`: claves `travelAssistant:*`, `meta.schemaVersion = 1`, JSON y error controlado si LocalStorage no está disponible o está lleno (D-104).
-- [ ] **T-2.2** Repositorios `LocalStorage{Trip,Budget,Expense,Activity,ForecastAlert}Repository`. `ForecastAlert` no tiene `update` (INV-26).
-- [ ] **T-2.3** `SystemClock` (`now()`, `today()` en hora local).
+- [x] **T-2.1** `storage.js`: claves `travelAssistant:*`, `meta.schemaVersion = 1`, JSON y error controlado si LocalStorage no está disponible o está lleno (D-104).
+- [x] **T-2.2** Repositorios `LocalStorage{Trip,Budget,Expense,Activity,ForecastAlert}Repository`. `ForecastAlert` no tiene `update` (INV-26).
+- [x] **T-2.3** `SystemClock` (`now()`, `today()` en hora local).
   - Fecha simulada para pruebas manuales (D-123): `?today=YYYY-MM-DD&time=HH:MM` fija "hoy" y la hora para probar estados, rollover y las 08:00. Sin parámetros se usa la fecha real.
-- [ ] **T-2.4** `BrowserNotificationAdapter` (Notification API) e `IdGenerator` (`crypto.randomUUID()`, que funciona en localhost).
+- [x] **T-2.4** `BrowserNotificationAdapter` (Notification API) e `IdGenerator` (`crypto.randomUUID()`, que funciona en localhost).
 
 **Comportamiento sin cambios:**
 
@@ -88,8 +88,8 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 3 — Estado (`src/state/`)
 
-- [ ] **T-3.1** `store.js`: estado en memoria con `getState`, `setState` y `subscribe`. Estado de UI global según design §5.1.
-- [ ] **T-3.2** `selectors.js`: valores derivados y memoizados que usan solo funciones del dominio. Nunca se persisten (D-103).
+- [x] **T-3.1** `store.js`: estado en memoria con `getState`, `setState` y `subscribe`. Estado de UI global según design §5.1.
+- [x] **T-3.2** `selectors.js`: valores derivados y memoizados que usan solo funciones del dominio. Nunca se persisten (D-103).
 
 **Comportamiento sin cambios:**
 
@@ -102,10 +102,10 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 4 — UI base (`src/ui/`)
 
-- [ ] **T-4.1** `App` y `Router`.
+- [x] **T-4.1** `App` y `Router`.
   - Router por hash (D-122): rutas `#/trips`, `#/trips/new`, `#/trip/{id}/today`, `/itinerary`, `/expenses`, `/summary`, `/settings`. Escucha `hashchange`; Atrás/Adelante y recargar conservan la pantalla.
-- [ ] **T-4.2** `TripShell`: barra inferior en celular y menú lateral en escritorio. Abre en la pestaña inicial según el estado (D-061, design §3.5).
-- [ ] **T-4.3** Componentes compartidos (design §3.4): `MoneyText`, `ConfirmDialog` (un aviso con todos los motivos), `CategoryCard`, `OverBudgetAlert`, `MoneyInput` (USD → centavos), `DayTabs`, `CategoryChips`, `CollapsibleSection`.
+- [x] **T-4.2** `TripShell`: barra inferior en celular y menú lateral en escritorio. Abre en la pestaña inicial según el estado (D-061, design §3.5).
+- [x] **T-4.3** Componentes compartidos (design §3.4): `MoneyText`, `ConfirmDialog` (un aviso con todos los motivos), `CategoryCard`, `OverBudgetAlert`, `MoneyInput` (USD → centavos), `DayTabs`, `CategoryChips`, `CollapsibleSection`.
 
 **Comportamiento sin cambios:**
 
@@ -118,10 +118,10 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 5 — Mis viajes y Crear viaje (flujo 8.2)
 
-- [ ] **T-5.1** `tripService.create`: valida, asigna el estado según las fechas y guarda `Trip` + `GlobalBudget`.
-- [ ] **T-5.2** `TripListScreen`: grupos En curso / Planificados / Finalizados y estado vacío (D-085).
-- [ ] **T-5.3** `TripCreateWizard` en 3 pasos (D-070). El paso 2 muestra en vivo el total en USD y el límite diario.
-- [ ] **T-5.4** Paso 3: interruptor ON por defecto (D-068). Al activarlo se pide permiso de notificaciones.
+- [x] **T-5.1** `tripService.create`: valida, asigna el estado según las fechas y guarda `Trip` + `GlobalBudget`.
+- [x] **T-5.2** `TripListScreen`: grupos En curso / Planificados / Finalizados y estado vacío (D-085).
+- [x] **T-5.3** `TripCreateWizard` en 3 pasos (D-070). El paso 2 muestra en vivo el total en USD y el límite diario.
+- [x] **T-5.4** Paso 3: interruptor ON por defecto (D-068). Al activarlo se pide permiso de notificaciones.
 
 **Cubre:** REQ-F-01A, REQ-F-01B, REQ-F-05, REQ-F-06, INV-28, INV-29.
 
@@ -137,9 +137,9 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 6 — Arranque, tiempo y pantalla Hoy
 
-- [ ] **T-6.1** `main.js`: hidratar el store y ejecutar `tripService.refreshStatuses()`, que guarda el estado (D-106).
-- [ ] **T-6.2** Eventos de tiempo: `visibilitychange` y un temporizador a las 00:00 (D-105).
-- [ ] **T-6.3** `TodayScreen`: total disponible, 3 `CategoryCard` y actividades de hoy (D-062). Variantes `PLANNED` y `FINISHED`.
+- [x] **T-6.1** `main.js`: hidratar el store y ejecutar `tripService.refreshStatuses()`, que guarda el estado (D-106).
+- [x] **T-6.2** Eventos de tiempo: `visibilitychange` y un temporizador a las 00:00 (D-105).
+- [x] **T-6.3** `TodayScreen`: total disponible, 3 `CategoryCard` y actividades de hoy (D-062). Variantes `PLANNED` y `FINISHED`.
 
 **Cubre:** REQ-F-03B, REQ-F-04B.
 
@@ -154,13 +154,13 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 7 — Gastos (flujos 8.1, 8.4 y 8.5)
 
-- [ ] **T-7.1** `expenseService.register`, `update` y `delete`, con motivos y confirmación única.
-- [ ] **T-7.2** `ExpenseForm`:
+- [x] **T-7.1** `expenseService.register`, `update` y `delete`, con motivos y confirmación única.
+- [x] **T-7.2** `ExpenseForm`:
   - monto en USD (D-120);
   - fecha entre `startDate` y `min(hoy, endDate)` (D-055).
-- [ ] **T-7.3** `OTHER` sin fondo → pedir crearlo, también en `FINISHED` (D-031, D-098).
-- [ ] **T-7.4** `AddExpenseButton` desactivado en `PLANNED` (D-066).
-- [ ] **T-7.5** `ExpensesScreen`: chips de categoría y gastos agrupados por día (D-090).
+- [x] **T-7.3** `OTHER` sin fondo → pedir crearlo, también en `FINISHED` (D-031, D-098).
+- [x] **T-7.4** `AddExpenseButton` desactivado en `PLANNED` (D-066).
+- [x] **T-7.5** `ExpensesScreen`: chips de categoría y gastos agrupados por día (D-090).
 
 **Cubre:** REQ-F-03, REQ-F-04A, REQ-F-04B, REQ-F-18.
 
@@ -176,9 +176,9 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 8 — Itinerario y actividades (flujo 8.6)
 
-- [ ] **T-8.1** `activityService`: crear, editar y eliminar (D-076 a D-078). `estimatedCost` en USD.
-- [ ] **T-8.2** `ItineraryScreen`: encabezado con lo planificado frente al presupuesto (D-050), `DayTabs` y lista ordenada por hora.
-- [ ] **T-8.3** Sección "Fuera del viaje": eliminar o cambiar la fecha a un día válido, que la devuelve con `isDetached = false` (D-089).
+- [x] **T-8.1** `activityService`: crear, editar y eliminar (D-076 a D-078). `estimatedCost` en USD.
+- [x] **T-8.2** `ItineraryScreen`: encabezado con lo planificado frente al presupuesto (D-050), `DayTabs` y lista ordenada por hora.
+- [x] **T-8.3** Sección "Fuera del viaje": eliminar o cambiar la fecha a un día válido, que la devuelve con `isDetached = false` (D-089).
 
 **Comportamiento sin cambios:**
 
@@ -190,7 +190,7 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 9 — Resumen (D-091)
 
-- [ ] **T-9.1** `SummaryScreen`: `TripTotalHeader`, `CategoryBreakdown` y `ReserveFundCard`. En `PLANNED`, sin la columna "Gastado"; el fondo se oculta si no existe.
+- [x] **T-9.1** `SummaryScreen`: `TripTotalHeader`, `CategoryBreakdown` y `ReserveFundCard`. En `PLANNED`, sin la columna "Gastado"; el fondo se oculta si no existe.
 
 **Comportamiento sin cambios:**
 
@@ -203,11 +203,11 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 10 — Ajustes (flujos 8.3 y 8.7)
 
-- [ ] **T-10.1** `TripDataForm` y `ReminderToggle`.
-- [ ] **T-10.2** `DatesForm` + `tripService.changeDates`, con bloqueos por estado (D-071 a D-073):
+- [x] **T-10.1** `TripDataForm` y `ReminderToggle`.
+- [x] **T-10.2** `DatesForm` + `tripService.changeDates`, con bloqueos por estado (D-071 a D-073):
   - en `PLANNED`, las actividades se mueven con el viaje (D-072);
   - al acortar, se listan y desasocian las actividades que quedan fuera (REQ-F-13A).
-- [ ] **T-10.3** `BudgetForm` + `budgetService.update`, con bloqueos por estado (D-079 a D-081) y el motivo "categoría por debajo de lo gastado".
+- [x] **T-10.3** `BudgetForm` + `budgetService.update`, con bloqueos por estado (D-079 a D-081) y el motivo "categoría por debajo de lo gastado".
 
 **Cubre:** REQ-F-13A, REQ-F-13B, INV-27.
 
@@ -223,9 +223,9 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 11 — Resumen matutino (flujo 8.8)
 
-- [ ] **T-11.1** `forecastService.ensureTodayAlert`: crea un `DailyForecastAlert` inmutable por día (INV-26, D-082).
-- [ ] **T-11.2** Temporizador de las 08:00 con notificación si `isReminderActive` (D-035).
-- [ ] **T-11.3** `MorningSummaryCard`, que se puede cerrar y se muestra una vez al día.
+- [x] **T-11.1** `forecastService.ensureTodayAlert`: crea un `DailyForecastAlert` inmutable por día (INV-26, D-082).
+- [x] **T-11.2** Temporizador de las 08:00 con notificación si `isReminderActive` (D-035).
+- [x] **T-11.3** `MorningSummaryCard`, que se puede cerrar y se muestra una vez al día.
 
 **Cubre:** REQ-F-02.
 
@@ -241,8 +241,8 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 12 — Duplicar y eliminar viaje
 
-- [ ] **T-12.1** `tripService.duplicate` (D-057, D-058, D-095). Nombre prellenado "Copia de…" y actividades por día relativo.
-- [ ] **T-12.2** `tripService.delete` con `deleteByTripId` en los 5 repositorios (D-086).
+- [x] **T-12.1** `tripService.duplicate` (D-057, D-058, D-095). Nombre prellenado "Copia de…" y actividades por día relativo.
+- [x] **T-12.2** `tripService.delete` con `deleteByTripId` en los 5 repositorios (D-086).
 
 **Cubre:** REQ-F-19, REQ-F-20.
 
@@ -257,10 +257,43 @@ No usa el navegador, LocalStorage ni `new Date()` del sistema (D-101).
 
 ## Fase 13 — Cierre
 
-- [ ] **T-13.1** Revisión responsive (360 px, tablet y escritorio) y textos en español.
-- [ ] **T-13.2** Recorrer la matriz de design §8.1 y marcar cada REQ como verificado.
-- [ ] **T-13.3** Actualizar el README (estado del proyecto) y la retrospectiva.
+- [x] **T-13.1** Revisión responsive (360 px, tablet y escritorio) y textos en español.
+- [x] **T-13.2** Recorrer la matriz de design §8.1 y marcar cada REQ como verificado.
+- [x] **T-13.3** Actualizar el README (estado del proyecto) y la retrospectiva. *(La retrospectiva la escribe el autor.)*
 
 **Comportamiento sin cambios:**
 
 - El pulido visual no cambia reglas: se repite la verificación completa de las fases 1 a 12.
+
+---
+
+## Verificación final (T-13.2)
+
+Recorrido de la matriz de `design.md` §8.1. Todas las pruebas se hicieron con la fecha simulada (D-123) y se repitieron al cerrar cada fase posterior (comportamiento sin cambios).
+
+| REQ | Verificado en | Caso comprobado | Estado |
+|---|---|---|---|
+| REQ-F-01A | Fase 5 | Roma del 5 al 9 nov → "Duración: 5 días"; todo en USD (D-120) | ✅ |
+| REQ-F-01B | Fase 5, Fase 6 | Comida $500 / 5 días → $100.00 diarios en el paso 2 y en Hoy (PLANNED) | ✅ |
+| REQ-F-02 | Fase 11 | 07:59 sin tarjeta; 08:00 tarjeta + notificación; apertura posterior solo tarjeta; recordatorio OFF sin notificación; resumen inmutable | ✅ |
+| REQ-F-03 | Fase 7 | Gasto de hoy baja el disponible; gasto de ayer baja el límite de hoy ($42.16 → $27.16); en FINISHED solo cambia TotalTripSpent | ✅ |
+| REQ-F-03B | Fase 6 | 23:59 → 00:00: Comida $30.00 de $100.00 → $107.50 de $107.50 | ✅ |
+| REQ-F-04A | Fase 7 | $45.68 con tope $40 y disponible $30: una sola confirmación con 2 motivos; se guarda en −$15.68 | ✅ |
+| REQ-F-04B | Fases 7, 8, 9 | Tarjeta roja con ⚠ en Hoy, encabezado "Excede" en Itinerario y "Sobrecosto" en Resumen | ✅ |
+| REQ-F-05 | Fases 5, 10, 12 | Inicio > fin bloqueado; inicio pasado bloqueado; fechas cruzadas bloqueadas al crear, cambiar fechas y duplicar | ✅ |
+| REQ-F-06 | Fases 5, 7, 8, 10 | 0 y negativos rechazados en presupuesto, topes y gastos; actividades admiten 0 (INV-22) | ✅ |
+| REQ-F-13A | Fase 10 | Acortar el viaje lista las actividades fuera; cancelar no cambia nada; confirmar las pasa a "Fuera del viaje" | ✅ |
+| REQ-F-13B | Fase 10 | Tras cambiar el fin, el límite de hoy se recalcula con los días restantes | ✅ |
+| REQ-F-18 | Fase 7 | Gasto OTHER sin fondo pide crearlo; fondo negativo pide confirmación; los límites diarios no cambian | ✅ |
+| REQ-F-19 | Fase 12 | "Copia de…", actividades por día relativo, aviso de excluidas, sin gastos; el original no cambia | ✅ |
+| REQ-F-20 | Fase 12 | Confirmación explícita; se borran viaje, presupuesto, gastos, actividades y resúmenes; las fechas quedan libres | ✅ |
+
+| RNF | Cómo se cumple | Estado |
+|---|---|---|
+| RNF-01 | Todo se guarda en LocalStorage (`travelAssistant:*`); sin backend | ✅ |
+| RNF-02 | Sin servicios externos: ni APIs ni fuentes web | ✅ |
+| RNF-03 | Revisado en 360 px, 768 px y 1280 px sin desbordes horizontales | ✅ |
+| RNF-04 | Montos en centavos USD; redondeo ½↑ en divisiones | ✅ |
+| RNF-05 | Código en inglés; todos los textos de la interfaz en español | ✅ |
+| RNF-06 | El dominio no importa nada de otras capas; el acceso a datos es por repositorios | ✅ |
+| RNF-07 | JavaScript sin framework ni build; `index.html` + módulos ES | ✅ |

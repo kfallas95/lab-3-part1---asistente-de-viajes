@@ -1,0 +1,1324 @@
+/* =========================================================
+   Asistente de Viajes — estilos base
+   Mobile-first y responsive (D-060). Paleta verde/crema,
+   títulos serif y tarjetas redondeadas (referencia de estilo, D-005).
+   Sin fuentes externas: la app no consume servicios externos (D-063).
+   ========================================================= */
+
+:root {
+  /* Paleta */
+  --color-bg: #f7f2e7;            /* crema */
+  --color-surface: #fffdf8;       /* tarjetas */
+  --color-primary: #2f5d50;       /* verde principal */
+  --color-primary-dark: #234539;
+  --color-primary-soft: #dfe9e2;  /* verde claro: barras y chips */
+  --color-text: #1f2a26;
+  --color-text-muted: #5f6b66;
+  --color-border: #e4dccb;
+  --color-danger: #b3261e;        /* sobrecosto (REQ-F-04B) */
+  --color-danger-soft: #fbe4e2;
+  --color-warning: #a66a00;
+
+  /* Tipografía */
+  --font-title: Georgia, "Times New Roman", serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Forma y espacio */
+  --radius: 16px;
+  --radius-small: 10px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --shadow: 0 1px 3px rgba(31, 42, 38, 0.08);
+
+  /* Layout */
+  --content-max: 960px;
+  --bottom-nav-height: 64px;
+}
+
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 var(--space-3);
+}
+
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.375rem; }
+h3 { font-size: 1.125rem; }
+
+p {
+  margin: 0 0 var(--space-2);
+}
+
+a {
+  color: var(--color-primary);
+}
+
+/* ---------- Layout ---------- */
+
+.app {
+  min-height: 100vh;
+}
+
+.page {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+.stack > * + * {
+  margin-top: var(--space-3);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.row--between {
+  justify-content: space-between;
+}
+
+/* ---------- Tarjetas ---------- */
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space-4);
+}
+
+.card + .card {
+  margin-top: var(--space-3);
+}
+
+.card--danger {
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+/* ---------- Texto ---------- */
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-danger {
+  color: var(--color-danger);
+}
+
+.section-title {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.amount-main {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* ---------- Botones ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px; /* tamaño táctil */
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn:hover {
+  background: var(--color-primary-dark);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--secondary {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn--secondary:hover {
+  background: var(--color-primary-soft);
+}
+
+.btn--danger {
+  background: var(--color-danger);
+}
+
+.btn--danger:hover {
+  background: #8f1e18;
+}
+
+/* ---------- Formularios ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.field label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: #fff;
+  color: var(--color-text);
+  font: inherit;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.field-error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+/* ---------- Barra de progreso ---------- */
+
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  background: var(--color-primary);
+}
+
+.progress--danger .progress__bar {
+  background: var(--color-danger);
+}
+
+/* ---------- Alertas y montos ---------- */
+
+.money {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.over-budget {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.category-card__title {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.category-card .amount-main {
+  margin: var(--space-2) 0 var(--space-1);
+  overflow-wrap: anywhere;
+}
+
+.category-card .progress {
+  flex: 1;
+  max-width: 55%;
+}
+
+.money-field {
+  position: relative;
+}
+
+.money-field__prefix {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+}
+
+.money-field .input {
+  padding-left: calc(var(--space-3) + 14px);
+}
+
+/* ---------- Pestañas por día y chips ---------- */
+
+.tabs,
+.chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+  scrollbar-width: thin;
+}
+
+.tab,
+.chip {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.tab--active,
+.chip--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- Sección plegable ---------- */
+
+.collapsible {
+  margin-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+
+.collapsible__summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.collapsible__body {
+  margin-top: var(--space-3);
+}
+
+/* ---------- Diálogo de confirmación (INV-15) ---------- */
+
+.dialog {
+  width: min(92vw, 420px);
+  border: none;
+  border-radius: var(--radius);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.dialog::backdrop {
+  background: rgba(31, 42, 38, 0.45);
+}
+
+.dialog__title {
+  font-size: 1.25rem;
+}
+
+.dialog__reasons {
+  margin: 0 0 var(--space-4);
+  padding-left: var(--space-5);
+}
+
+.dialog__reasons li + li {
+  margin-top: var(--space-2);
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* ---------- TripShell: celular (D-061) ---------- */
+
+.shell__content {
+  padding-bottom: calc(var(--bottom-nav-height) + var(--space-6) + 56px);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 0 var(--space-4);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.topbar__back,
+.topbar__settings {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 1.25rem;
+}
+
+.topbar__title {
+  flex: 1;
+  font-family: var(--font-title);
+  font-size: 1.125rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: var(--bottom-nav-height);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-link--bottom {
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.75rem;
+}
+
+.nav-link__icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.nav-link--active {
+  color: var(--color-primary);
+}
+
+.fab {
+  position: fixed;
+  right: var(--space-4);
+  bottom: calc(var(--bottom-nav-height) + var(--space-4));
+  z-index: 11;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(31, 42, 38, 0.25);
+  cursor: pointer;
+}
+
+.fab:disabled {
+  background: #9aa7a1;
+  cursor: not-allowed;
+}
+
+.sidebar {
+  display: none;
+}
+
+/* ---------- Encabezados de página y enlaces ---------- */
+
+.page-header {
+  margin-bottom: var(--space-4);
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.link-muted {
+  color: var(--color-text-muted);
+}
+
+.link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: var(--space-3);
+}
+
+/* ---------- Mis viajes (D-085) ---------- */
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.empty-state__title {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  margin-bottom: var(--space-4);
+}
+
+.trip-group .section-title {
+  margin-top: var(--space-4);
+}
+
+.trip-card {
+  position: relative;
+  padding: 0;
+}
+
+.trip-card:hover {
+  border-color: var(--color-primary);
+}
+
+.trip-card__link {
+  display: block;
+  padding: var(--space-4);
+  padding-right: 56px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.trip-card__menu {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.trip-card__title {
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.trip-card__meta {
+  margin: 0;
+}
+
+/* ---------- Formularios: errores y filas ---------- */
+
+.field--invalid .input,
+.field--invalid .textarea,
+.field--invalid.budget-cell .input {
+  border-color: var(--color-danger);
+}
+
+.form-error {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.form-error:empty {
+  display: none;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.field-row .input {
+  min-width: 0;
+}
+
+/* Celulares angostos: las fechas y horas van una debajo de la otra */
+@media (max-width: 400px) {
+  .field-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+/* ---------- Wizard Crear viaje (D-070) ---------- */
+
+.wizard__step {
+  margin-bottom: var(--space-2);
+}
+
+.wizard__progress {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.wizard__dot {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-border);
+}
+
+.wizard__dot--done {
+  background: var(--color-primary);
+}
+
+.wizard__duration {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.wizard__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.budget-grid {
+  display: grid;
+  grid-template-columns: minmax(84px, auto) 1fr 1fr;
+  gap: var(--space-2) var(--space-2);
+  align-items: start;
+}
+
+.budget-grid--optional {
+  grid-template-columns: minmax(84px, auto) 1fr;
+}
+
+.budget-grid__head {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.budget-grid__label {
+  padding-top: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.budget-preview {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.budget-preview__total {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* ---------- Interruptor ON/OFF ---------- */
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 48px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggle__control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 48px;
+  height: 28px;
+  margin: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.toggle__track {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  background: #b9c2bd;
+  transition: background 0.15s;
+}
+
+.toggle__track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+
+.toggle__input:checked + .toggle__track {
+  background: var(--color-primary);
+}
+
+.toggle__input:checked + .toggle__track::after {
+  transform: translateX(20px);
+}
+
+.toggle__input:focus-visible + .toggle__track {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.toggle__state {
+  min-width: 2.2em;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Hoy (D-062) ---------- */
+
+.today-total {
+  margin: var(--space-2) 0 var(--space-4);
+}
+
+.today-total__label {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.today-total__amount {
+  margin: 0;
+}
+
+.today-total__amount .amount-main {
+  font-size: 2rem;
+}
+
+.today-message {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--space-3);
+}
+
+.activity-mini-list,
+.limit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.activity-mini-list li,
+.limit-list li {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.limit-list li {
+  justify-content: space-between;
+}
+
+.activity-mini-list__time {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Gastos (D-090) ---------- */
+
+.expense-day {
+  margin-top: var(--space-4);
+}
+
+.expense-day__header .section-title {
+  margin: 0;
+}
+
+.expense-day__total {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.expense-list {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.expense-list li + li {
+  border-top: 1px solid var(--color-border);
+}
+
+.expense-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.expense-item:hover {
+  background: var(--color-primary-soft);
+}
+
+.expense-item__concept {
+  flex: 1;
+}
+
+.expense-item__amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Formulario de gasto (wireframe §6) ---------- */
+
+.dialog--sheet {
+  width: min(96vw, 480px);
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: var(--color-primary-soft);
+}
+
+.radio-group {
+  border: none;
+  padding: 0;
+  margin: 0 0 var(--space-3);
+}
+
+.radio-group legend {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: var(--space-1);
+}
+
+.radio-group__options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: #fff;
+  cursor: pointer;
+}
+
+.radio:has(input:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  font-weight: 600;
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* ---------- Itinerario (D-088, D-089) ---------- */
+
+.planned-header {
+  margin-bottom: var(--space-4);
+}
+
+.planned-header__text {
+  margin-bottom: var(--space-2);
+}
+
+.itinerary__date {
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.itinerary__add {
+  margin-top: var(--space-3);
+}
+
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.activity-list li + li {
+  border-top: 1px solid var(--color-border);
+}
+
+.activity-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.activity-item:hover {
+  background: var(--color-primary-soft);
+}
+
+.activity-item__main,
+.activity-item__meta {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: space-between;
+}
+
+.activity-item__main {
+  justify-content: flex-start;
+}
+
+.activity-item__time {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-item__title {
+  font-weight: 600;
+}
+
+.activity-item__cost {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Resumen (D-091) ---------- */
+
+.summary-total__label,
+.summary-total__amount {
+  margin: 0;
+}
+
+.summary-total__amount .amount-main {
+  font-size: 2rem;
+}
+
+.summary-total__left {
+  margin: var(--space-2) 0 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.summary__heading {
+  display: flex;
+  justify-content: space-between;
+}
+
+.summary-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-4);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+.summary-row + .summary-row {
+  border-top: 1px solid var(--color-border);
+}
+
+.summary-row--bar {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.summary-row__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.summary-row__top .summary-row__amount {
+  margin-left: auto;
+}
+
+.summary-row__label {
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.summary-row__amount {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.summary-reserve {
+  margin-top: var(--space-4);
+}
+
+.summary-reserve .section-title {
+  margin-top: 0;
+}
+
+.summary-reserve p {
+  margin: 0;
+}
+
+/* ---------- Ajustes (D-092) ---------- */
+
+.back-link {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+}
+
+.settings-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-4);
+}
+
+.settings-list li + li {
+  border-top: 1px solid var(--color-border);
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 56px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.settings-item__hint {
+  margin-left: var(--space-2);
+  font-weight: 400;
+}
+
+.settings-item--toggle .toggle {
+  width: 100%;
+}
+
+.settings-note {
+  margin-top: var(--space-3);
+  font-size: 0.9rem;
+}
+
+.input:disabled {
+  background: #f1ede4;
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+/* ---------- Resumen matutino (REQ-F-02) ---------- */
+
+.morning-card {
+  margin-bottom: var(--space-4);
+  background: #fff8e6;
+  border-color: #ecd9a6;
+}
+
+.morning-card__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.morning-card__text {
+  margin: var(--space-1) 0 0;
+}
+
+/* ---------- Duplicar / Eliminar (REQ-F-19, REQ-F-20) ---------- */
+
+.action-sheet {
+  width: min(92vw, 360px);
+  padding: var(--space-2);
+}
+
+.action-sheet__title {
+  margin: var(--space-2) var(--space-3);
+  font-family: var(--font-title);
+  font-weight: 600;
+}
+
+.action-sheet__item {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-small);
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.action-sheet__item:hover {
+  background: var(--color-primary-soft);
+}
+
+.action-sheet__item--danger {
+  color: var(--color-danger);
+}
+
+.action-sheet__item--cancel {
+  color: var(--color-text-muted);
+}
+
+.settings-list--actions {
+  margin-top: var(--space-4);
+}
+
+.settings-item--button {
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-item--danger {
+  color: var(--color-danger);
+}
+
+/* ---------- Error al cargar los datos ---------- */
+
+.fatal-error {
+  max-width: 520px;
+  margin: var(--space-6) auto;
+}
+
+/* ---------- Aviso de fecha simulada (D-123) ---------- */
+
+.sim-banner {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: var(--space-2) var(--space-4);
+  background: #fff3cd;
+  border-bottom: 1px solid #e6c97a;
+  color: #6b4e00;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.sim-banner a {
+  color: inherit;
+  font-weight: 700;
+}
+
+/* ---------- Accesibilidad ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Computadora (D-060) ---------- */
+
+@media (min-width: 768px) {
+  .page {
+    padding: var(--space-6);
+  }
+
+  h1 { font-size: 2rem; }
+
+  /* TripShell: menú lateral en lugar de barra inferior (D-061) */
+  .shell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+
+  .topbar,
+  .bottom-nav,
+  .fab {
+    display: none;
+  }
+
+  .shell__content {
+    padding-bottom: var(--space-6);
+    width: 100%;
+    min-width: 0; /* evita que pestañas o montos largos ensanchen la columna */
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    height: 100vh;
+    padding: var(--space-5) var(--space-4);
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border);
+  }
+
+  .sidebar__back {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+
+  .sidebar__trip {
+    font-family: var(--font-title);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: var(--space-2) 0 var(--space-4);
+  }
+
+  .sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .nav-link--side {
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-small);
+  }
+
+  .nav-link--side.nav-link--active {
+    background: var(--color-primary-soft);
+  }
+
+  .sidebar__add {
+    margin: var(--space-4) 0;
+  }
+
+  /* Tarjetas en varias columnas */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .card-grid > .card + .card {
+    margin-top: 0;
+  }
+}

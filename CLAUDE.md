@@ -24,6 +24,8 @@
 | `docs/design.md` | Documento de diseño: arquitectura, módulos, manejo de estado y trazabilidad REQ → diseño. |
 | `docs/data-contract.json` | Contrato de datos en formato JSON Schema, con validaciones y ejemplos. |
 | `docs/wireframe.md` | Wireframes de las pantallas definidas (celular y computadora). |
+| `docs/tasks.md` | Plan de implementación por fases, con la regla de comportamiento sin cambios y la verificación final de cada requerimiento. |
+| `src/`, `index.html`, `styles.css` | Código de la aplicación (JavaScript con módulos ES, sin build). |
 | `README.md` | Resumen del proyecto, tecnología, estructura y cómo ejecutar. |
 | `retrospective.md` | Respuestas a las preguntas de reflexión del curso. |
 | Boceto visual (imagen de 4 pantallas) | **Solo referencia visual.** Contiene elementos ajenos al proyecto; no es fuente de requisitos. `[Autor]` |
@@ -605,7 +607,13 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
 | D-121 | Consecuencia de D-120: los montos de `GlobalBudget` y `Activity.estimatedCost` también se guardan en centavos enteros USD, igual que `Expense.amount` (D-051). | 2026-10-24 |
 | D-122 | Navegación con **router por hash** (`#/trip/{id}/today`…): funciona con Live Server sin configuración, conserva la pantalla al recargar y habilita Atrás/Adelante. | 2026-10-24 |
 | D-123 | **Fecha simulada para pruebas manuales:** `SystemClock` acepta `?today=YYYY-MM-DD&time=HH:MM` en la URL; sin parámetros usa la fecha real. Apoya la verificación manual (D-112) de estados, rollover y resumen de las 08:00. | 2026-10-24 |
+| D-124 | El fondo de imprevistos no se puede quitar (dejar vacío) en Ajustes → Presupuesto si el viaje ya tiene gastos `OTHER`: esos gastos quedarían sin fondo (INV-13). Se muestra un error y no se guarda. | 2026-10-25 |
+| D-125 | Un viaje duplicado empieza con el recordatorio en ON, igual que al crear un viaje (D-068), sin importar el valor del original. Complementa D-057. | 2026-10-25 |
+| D-126 | Al duplicar, las actividades "Fuera del viaje" del original también se copian y siguen en esa sección (`isDetached = true`), con la fecha desplazada desde el nuevo `startDate` igual que las demás. Complementa D-057 y D-058. | 2026-10-25 |
+| D-127 | Cuando la app usa una fecha simulada (D-123) se muestra un aviso arriba ("Fecha simulada: … · Volver a la fecha real") para no confundir una prueba con un error. | 2026-10-25 |
 > **Revisión de consistencia (2026-10-24):** se corrigieron sin cambio de contenido: mapeo de sección 7 a contrato de datos, referencia de Q-02, condición de notificación en 8.8, texto de confirmación en 8.9, `Activity.type` nullable, filtro de desasociadas en 7.4 y lista completa de motivos en INV-15. Hallazgos que requieren decisión: Q-41 a Q-47.
+>
+> **Implementación (2026-10-25):** aplicación construida en 14 fases según `docs/tasks.md`; decisiones de implementación D-124 a D-127.
 >
 > **Revisión de consistencia (2026-10-24, plan de desarrollo):** D-057 actualizado al estado según fechas (D-095); precondición de REQ-F-18 alineada con D-031/D-098; D-116, D-117, D-120 y D-121.
 
