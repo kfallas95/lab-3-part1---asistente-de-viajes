@@ -2,14 +2,13 @@
 
 | | |
 |---|---|
-| **Estado** | v1.1: propuestas P-01 a P-06 aprobadas por Kevin (D-101 a D-106). Pendientes técnicos en la §10 |
+| **Versión** | 1.0 |
 | **Fecha** | 2026-10-24 |
-| **Fuentes** | `docs/requirements.md` (v6) · `docs/data-contract.json` (contrato v2) · `docs/wireframe.md` y wireframe `[PDF §6–7]` · memoria semántica `CLAUDE.md` |
+| **Fuentes** | `docs/requirements.md` · `docs/data-contract.json` · `docs/wireframe.md` y wireframe `[PDF §6–7]` · memoria semántica `CLAUDE.md` |
 
 ### Convenciones de este documento
 
-- **[D-xxx]** marca una decisión ya aprobada y registrada en `CLAUDE.md` §10.
-- **[P-xx]** marca una propuesta del arquitecto. Todas las de este documento (P-01 a P-06) **fueron aprobadas** y se registraron como D-101 a D-106 (§9).
+- **[D-xxx]** marca la decisión registrada en `CLAUDE.md` §10 que respalda cada parte del diseño.
 - Los identificadores de código van en inglés y los textos de la interfaz en español [D-019].
 - Tecnología: **JavaScript sin framework de UI** (D-107, D-110). Los componentes de la §3 son módulos JavaScript que generan y actualizan el DOM.
 
@@ -33,7 +32,7 @@
 
 ## 2. Arquitectura general
 
-### 2.1 Capas [P-01]
+### 2.1 Capas [D-101]
 
 La aplicación se organiza en cuatro capas. Cada capa solo depende de la que está debajo. La infraestructura implementa las interfaces que define el dominio, según el patrón repositorio [D-018].
 
@@ -87,7 +86,7 @@ flowchart TB
     REPO --> LS
 ```
 
-### 2.2 Puertos (interfaces del dominio) [P-01]
+### 2.2 Puertos (interfaces del dominio) [D-101]
 
 | Puerto | Operaciones | Implementación |
 |---|---|---|
@@ -108,7 +107,7 @@ flowchart TB
 
 ### 3.1 Correspondencia con el wireframe
 
-El wireframe del PDF (§6) era un boceto de una sola pantalla. Kevin aprobó separar el contenido en pantallas con un solo propósito cada una [D-061]. El boceto visual de 4 pantallas es solo referencia de estilo [D-005].
+El wireframe del PDF (§6) era un boceto de una sola pantalla. El contenido se separó en pantallas con un solo propósito cada una [D-061]. El boceto visual de 4 pantallas es solo referencia de estilo [D-005].
 
 | Sección del wireframe `[PDF §6]` | Componente(s) en este diseño |
 |---|---|
@@ -191,7 +190,7 @@ flowchart TB
 | `DayTabs` | Pestañas Día 1…N. Abre en el día de hoy si el viaje está `IN_PROGRESS`; si no, en el Día 1 | D-088 |
 | `CategoryChips` | Filtro Todos / Comida / Transporte / Actividades / Otros | D-090 |
 | `CollapsibleSection` | Sección plegable, usada para "Fuera del viaje" | D-089 |
-| `MorningSummaryCard` | Tarjeta cerrable con `assistantMessage` del día | REQ-F-02 v6 |
+| `MorningSummaryCard` | Tarjeta cerrable con `assistantMessage` del día | REQ-F-02 |
 
 ### 3.5 Comportamiento responsive [D-060, D-061]
 
@@ -204,7 +203,7 @@ flowchart TB
 
 ---
 
-## 4. Estructura de módulos [P-02]
+## 4. Estructura de módulos [D-102]
 
 ```text
 index.html                      # punto de entrada; carga src/main.js como módulo ES (D-113)
@@ -227,7 +226,7 @@ src/
 │   ├── activityService         # gestionar actividades                                   8.6
 │   └── forecastService         # resumen matutino                                        8.8
 ├── infrastructure/
-│   ├── storage                 # adaptador LocalStorage: claves, serialización, versión   P-04
+│   ├── storage                 # adaptador LocalStorage: claves, serialización, versión   D-104
 │   ├── repositories            # LocalStorage*Repository
 │   ├── clock                   # SystemClock
 │   └── notifications           # BrowserNotificationAdapter
@@ -245,7 +244,7 @@ src/
 
 ## 5. Manejo de estado
 
-### 5.1 Dónde vive cada dato [P-03]
+### 5.1 Dónde vive cada dato [D-103]
 
 | Tipo de dato | Dónde vive | ¿Persistido? | Ejemplos |
 |---|---|---|---|
@@ -258,20 +257,20 @@ src/
 
 ### 5.2 Ciclo de lectura y escritura
 
-1. **Arranque (hidratación):** se leen las entidades desde los repositorios y se cargan en el store. Después se ejecutan `tripService.refreshStatuses()` [D-032, P-06] y `forecastService.ensureTodayAlert()` [REQ-F-02 v6].
+1. **Arranque (hidratación):** se leen las entidades desde los repositorios y se cargan en el store. Después se ejecutan `tripService.refreshStatuses()` [D-032, D-106] y `forecastService.ensureTodayAlert()` [REQ-F-02].
 2. **Escritura:** la UI llama a un servicio. El servicio valida con el dominio y construye los motivos de confirmación. Si hay motivos, la UI muestra `ConfirmDialog`. Si el cliente confirma, el servicio guarda con el repositorio y actualiza el store. Los selectores se recalculan y la UI se vuelve a dibujar.
 3. **Si falla la validación,** no se guarda nada y la UI muestra el mensaje de error [D-002].
 4. **Si el cliente cancela la confirmación,** no se guarda nada [INV-15].
 
-### 5.3 Eventos de tiempo [P-05]
+### 5.3 Eventos de tiempo [D-105]
 
 | Evento | Acción | Referencia |
 |---|---|---|
-| La app se abre o vuelve a primer plano | `refreshStatuses()` y `ensureTodayAlert()` | D-032, REQ-F-02 v6 |
+| La app se abre o vuelve a primer plano | `refreshStatuses()` y `ensureTodayAlert()` | D-032, REQ-F-02 |
 | Medianoche (00:00 local) con la app abierta | Actualizar el "hoy" del store y `refreshStatuses()`. Los selectores recalculan los límites del nuevo día | D-100, INV-10 |
-| 08:00 con la app abierta | `ensureTodayAlert()` con notificación del navegador si `isReminderActive` | REQ-F-02 v6, D-035 |
+| 08:00 con la app abierta | `ensureTodayAlert()` con notificación del navegador si `isReminderActive` | REQ-F-02, D-035 |
 
-### 5.4 Estructura en LocalStorage [P-04]
+### 5.4 Estructura en LocalStorage [D-104]
 
 | Clave | Contenido |
 |---|---|
@@ -365,7 +364,7 @@ flowchart TD
     I --> J[Generar assistantMessage con plantilla - D-083]
     J --> K[Mostrar MorningSummaryCard en Hoy]
     K --> L{¿App abierta a las 08:00 y isReminderActive?}
-    L -- Sí --> M[NotificationPort.notify - REQ-F-02 v6] --> Z
+    L -- Sí --> M[NotificationPort.notify - REQ-F-02] --> Z
     L -- No --> Z
 ```
 
@@ -408,16 +407,16 @@ flowchart LR
 
 | REQ | Resumen | UI | Aplicación | Dominio | Persistencia | Flujo / reglas |
 |---|---|---|---|---|---|---|
-| **REQ-F-01A (v6)** | Convertir a USD con la tasa ingresada por el cliente y calcular los días totales | `StepBudget`, `BudgetForm`, `ExchangeRateInput` | `tripService.create`, `budgetService.update` | `money.toUsdCents`, `dates.totalDays` | `BudgetRepository` guarda montos en divisa original + tasa (D-096) | 8.2, 8.7 · INV-04, INV-18, D-067 |
+| **REQ-F-01A** | Convertir a USD con la tasa ingresada por el cliente y calcular los días totales | `StepBudget`, `BudgetForm`, `ExchangeRateInput` | `tripService.create`, `budgetService.update` | `money.toUsdCents`, `dates.totalDays` | `BudgetRepository` guarda montos en divisa original + tasa (D-096) | 8.2, 8.7 · INV-04, INV-18, D-067 |
 | **REQ-F-01B** | Límite diario por categoría = monto ÷ días totales | `StepBudget` (vista previa), `CategoryCard` | — | `budgetCalculator.dailyLimit` (caso día 1) | No se persiste (D-097) | INV-06, D-007 |
-| **REQ-F-02 (v6)** | Resumen matutino: notificación a las 08:00 si la app está abierta; si no, al abrirla | `MorningSummaryCard`, `ReminderToggle` | `forecastService.ensureTodayAlert` | `forecastMessage`, `budgetCalculator` | `ForecastAlertRepository.create` (inmutable) | 8.8 · D-034, D-035, D-082, D-083, INV-26 |
-| **REQ-F-03 (v6)** | Recalcular el disponible al registrar, editar o eliminar un gasto; los gastos pasados ajustan el límite de hoy | `ExpenseForm`, `TodayScreen`, `ExpensesScreen` | `expenseService.register/update/delete` | `dailyLimit`, `dailyRemaining`, `totalTripSpent` | `ExpenseRepository` | 8.1, 8.4, 8.5 · D-054, D-055, D-056, D-065 |
+| **REQ-F-02** | Resumen matutino: notificación a las 08:00 si la app está abierta; si no, al abrirla | `MorningSummaryCard`, `ReminderToggle` | `forecastService.ensureTodayAlert` | `forecastMessage`, `budgetCalculator` | `ForecastAlertRepository.create` (inmutable) | 8.8 · D-034, D-035, D-082, D-083, INV-26 |
+| **REQ-F-03** | Recalcular el disponible al registrar, editar o eliminar un gasto; los gastos pasados ajustan el límite de hoy | `ExpenseForm`, `TodayScreen`, `ExpensesScreen` | `expenseService.register/update/delete` | `dailyLimit`, `dailyRemaining`, `totalTripSpent` | `ExpenseRepository` | 8.1, 8.4, 8.5 · D-054, D-055, D-056, D-065 |
 | **REQ-F-03B** | Rollover del sobrante o déficit a los días restantes | `TodayScreen` | — | `dailyLimit` (fórmula de D-007, bajo demanda) | No se persiste | INV-10, D-034, D-100 |
 | **REQ-F-04A** | Permitir gastos que exceden el límite, con saldo negativo | `ConfirmDialog` | `expenseService.register` | `confirmationReasons` | `ExpenseRepository` | 8.1 · INV-08, INV-15 |
 | **REQ-F-04B** | Alerta visual cuando un disponible es < 0 | `CategoryCard`, `OverBudgetAlert`, `CategoryBreakdown` | — | selectores `isOverBudget` | — | INV-09, D-008 |
 | **REQ-F-05** | Bloquear inicio > fin | `StepTripData`, `DatesForm`, diálogo de duplicar | `tripService.create/changeDates/duplicate` | `validators.dateRange` | — | 8.2, 8.3 · INV-03, INV-28, INV-29 |
 | **REQ-F-06** | Rechazar montos ≤ 0 | `StepBudget`, `BudgetForm`, `ExpenseForm` | servicios de presupuesto y gastos | `validators.positiveAmount` | — | INV-01, INV-17, D-006 (actividades: INV-22) |
-| **REQ-F-13A (v6)** | Al acortar el viaje, desasociar las actividades fuera de rango y notificar | `DatesForm`, `ConfirmDialog` (listado), sección "Fuera del viaje" | `tripService.changeDates` | `dates.outOfRangeActivities` | `ActivityRepository.saveMany` (`isDetached = true`) | 8.3 · INV-11, D-089, D-094 |
+| **REQ-F-13A** | Al acortar el viaje, desasociar las actividades fuera de rango y notificar | `DatesForm`, `ConfirmDialog` (listado), sección "Fuera del viaje" | `tripService.changeDates` | `dates.outOfRangeActivities` | `ActivityRepository.saveMany` (`isDetached = true`) | 8.3 · INV-11, D-089, D-094 |
 | **REQ-F-13B** | Recalcular la cuota diaria tras cambiar la duración | `TodayScreen` | `tripService.changeDates` | `dailyLimit` con los nuevos días restantes | No se persiste | 8.3 · INV-12, D-065 |
 | **REQ-F-18** | Gastos "Otros / Imprevistos" descuentan del fondo sin alterar las categorías diarias | `ExpenseForm`, `ReserveFundCard` | `expenseService.register` | `reserveRemaining` | `ExpenseRepository`, `BudgetRepository` (fondo) | 8.1 · INV-13, INV-19, D-031, D-098 |
 | **REQ-F-19** | Duplicar viaje | `TripActionsMenu`, `SettingsScreen` | `tripService.duplicate` | `dates` (día relativo, cruce) | Todos los repositorios del viaje nuevo | D-057, D-058, D-059, D-095, D-096 |
@@ -430,7 +429,7 @@ flowchart LR
 | Edición en vivo sin alterar los históricos | Edición de gastos, actividades, fechas y presupuesto (flujos 8.3–8.7). Los `DailyForecastAlert` son inmutables [INV-26] |
 | Parámetros reutilizables | LocalStorage [D-016] + "Duplicar viaje" [REQ-F-19] |
 | Planificación anticipada | Estado `PLANNED`, `ItineraryScreen` con planificado frente a presupuesto [D-050] |
-| Alarma / alerta diaria | REQ-F-02 (v6) · `forecastService` |
+| Alarma / alerta diaria | REQ-F-02 · `forecastService` |
 | Estandarización de moneda (USD) | `domain/money` [INV-05, INV-25] |
 
 ### 8.3 Reglas clave de `CLAUDE.md` que no son REQ
@@ -446,16 +445,16 @@ flowchart LR
 
 ---
 
-## 9. Propuestas del arquitecto (aprobadas)
+## 9. Decisiones de arquitectura
 
-| ID | Propuesta | Motivo | Estado |
-|---|---|---|---|
-| **P-01** | Arquitectura en capas (UI, Estado, Aplicación, Dominio, Infraestructura) con puertos `Clock`, `NotificationPort` e `IdGenerator`, además de los repositorios | Extiende D-018: la lógica de fechas y montos se puede probar sin navegador | Aprobada (D-101) |
-| **P-02** | Estructura de módulos de la §4 | Ubica cada regla en un solo lugar | Aprobada (D-102) |
-| **P-03** | Store global en memoria con selectores derivados; LocalStorage como fuente de verdad; nunca persistir derivados | Evita copias contradictorias (D-034, D-065, D-097) | Aprobada (D-103) |
-| **P-04** | Una clave de LocalStorage por colección, prefijo `travelAssistant:` y `schemaVersion` | Cierra el PENDIENTE de `CLAUDE.md` §9 | Aprobada (D-104) |
-| **P-05** | Eventos de tiempo: al abrir o volver a primer plano, a las 00:00 y a las 08:00 | Implementa D-034 y D-100 sin backend | Aprobada (D-105) |
-| **P-06** | `Trip.status` se recalcula y guarda en cada arranque y a medianoche | El estado depende de la fecha (D-032), pero está en el contrato | Aprobada (D-106) |
+| ID | Decisión | Motivo |
+|---|---|---|
+| **D-101** | Arquitectura en capas (UI, Estado, Aplicación, Dominio, Infraestructura) con puertos `Clock`, `NotificationPort` e `IdGenerator`, además de los repositorios | Extiende D-018: la lógica de fechas y montos se puede probar sin navegador |
+| **D-102** | Estructura de módulos de la §4 | Ubica cada regla en un solo lugar |
+| **D-103** | Store global en memoria con selectores derivados; LocalStorage como fuente de verdad; nunca persistir derivados | Evita copias contradictorias (D-034, D-065, D-097) |
+| **D-104** | Una clave de LocalStorage por colección, prefijo `travelAssistant:` y `schemaVersion` | Cierra el PENDIENTE de `CLAUDE.md` §9 |
+| **D-105** | Eventos de tiempo: al abrir o volver a primer plano, a las 00:00 y a las 08:00 | Implementa D-034 y D-100 sin backend |
+| **D-106** | `Trip.status` se recalcula y guarda en cada arranque y a medianoche | El estado depende de la fecha (D-032), pero está en el contrato |
 
 ---
 

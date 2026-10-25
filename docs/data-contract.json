@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://asistente-viajes.local/docs/data-contract.json",
-  "title": "Asistente de Viajes — Contrato de datos v2",
-  "description": "Contrato de datos aprobado (D-027) con los ajustes posteriores registrados en CLAUDE.md. Montos en USD expresados en centavos enteros (D-051). Los montos de GlobalBudget se guardan en su divisa original (D-096). Valores derivados (límites diarios, disponibles, TotalTripSpent, equivalentes USD) no se persisten (D-097, D-103).",
+  "title": "Asistente de Viajes — Contrato de datos",
+  "description": "Contrato de datos (D-027) con los ajustes posteriores registrados en CLAUDE.md. Montos en USD expresados en centavos enteros (D-051). Los montos de GlobalBudget se guardan en su divisa original (D-096). Valores derivados (límites diarios, disponibles, totalAmount, TotalTripSpent, equivalentes USD) no se persisten (D-097, D-103, D-115).",
   "$defs": {
     "uuid": {
       "type": "string",
@@ -68,7 +68,7 @@
     },
     "Trip": {
       "type": "object",
-      "description": "Viaje (v1: Viaje / Mi Viaje).",
+      "description": "Viaje.",
       "additionalProperties": false,
       "required": [
         "id",
@@ -120,7 +120,7 @@
     },
     "GlobalBudget": {
       "type": "object",
-      "description": "Presupuesto del viaje, 1 por Trip (v1: Presupuesto). Montos en originalCurrency; sus equivalentes USD se derivan (D-096). Divisa fija tras crear el viaje (D-080).",
+      "description": "Presupuesto del viaje, 1 por Trip. Montos en originalCurrency; sus equivalentes USD se derivan (D-096). Divisa fija tras crear el viaje (D-080). totalAmount (suma de las 6 categorías) es un valor derivado y no se persiste (D-115).",
       "additionalProperties": false,
       "required": [
         "id",
@@ -133,7 +133,6 @@
         "ticketsAmount",
         "lodgingAmount",
         "otherReserveAmount",
-        "totalAmount",
         "foodExpenseCap",
         "transportExpenseCap",
         "activitiesExpenseCap"
@@ -173,12 +172,6 @@
           "$ref": "#/$defs/optionalPositiveAmount",
           "description": "Fondo de Otros / Imprevistos (REQ-F-18). Opcional (D-025), editable durante el viaje (D-028); en FINISHED solo desde el aviso de un gasto OTHER (D-098)."
         },
-        "totalAmount": {
-          "type": "number",
-          "exclusiveMinimum": 0,
-          "readOnly": true,
-          "description": "DERIVADO, no editable: suma de los 6 montos en originalCurrency (D-024, INV-16)."
-        },
         "foodExpenseCap": {
           "$ref": "#/$defs/positiveAmount",
           "description": "ExpenseCap: tope por gasto individual de Comida (D-013, D-014)."
@@ -193,7 +186,7 @@
     },
     "Activity": {
       "type": "object",
-      "description": "Actividad del itinerario (v1: Actividad).",
+      "description": "Actividad del itinerario.",
       "additionalProperties": false,
       "required": [
         "id",
@@ -252,13 +245,13 @@
         "isDetached": {
           "type": "boolean",
           "default": false,
-          "description": "true si quedó fuera del rango al acortar el viaje (REQ-F-13A v6)."
+          "description": "true si quedó fuera del rango al acortar el viaje (REQ-F-13A)."
         }
       }
     },
     "Expense": {
       "type": "object",
-      "description": "Gasto registrado (v1: Gasto).",
+      "description": "Gasto registrado.",
       "additionalProperties": false,
       "required": [
         "id",
@@ -398,7 +391,6 @@
         "ticketsAmount": 416.7,
         "lodgingAmount": null,
         "otherReserveAmount": 92.6,
-        "totalAmount": 1389,
         "foodExpenseCap": 50,
         "transportExpenseCap": 25,
         "activitiesExpenseCap": 60

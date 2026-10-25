@@ -2,20 +2,20 @@
 
 | | |
 |---|---|
-| **Versión** | v1 |
+| **Versión** | 1.0 |
 | **Fecha** | 2026-10-24 |
-| **Base** | Wireframe original `[PDF §6]` · pantallas aprobadas en `CLAUDE.md` §7 (D-061, D-062, D-085, D-088, D-090 a D-092) · flujos de `CLAUDE.md` §8 |
+| **Base** | Wireframe original `[PDF §6]` · pantallas definidas en `CLAUDE.md` §7 (D-061, D-062, D-085, D-088, D-090 a D-092) · flujos de `CLAUDE.md` §8 |
 | **Estilo visual** | El boceto de 4 pantallas se usa **solo como referencia de estilo** (paleta verde/crema, títulos serif, ilustraciones planas, tarjetas redondeadas). Sus elementos de reserva de viajes no forman parte del proyecto (D-005). |
 
 Los wireframes son de baja fidelidad y están pensados primero para celular (D-060). La §9 muestra cómo se adapta el diseño a computadora. Los montos son ejemplos.
 
 ---
 
-## 0. Del wireframe original a las pantallas aprobadas
+## 0. Del wireframe original a las pantallas finales
 
-El wireframe del PDF (§6) concentraba todo en una sola pantalla. Se aprobó dividirlo en pantallas con un solo propósito cada una (D-061):
+El wireframe del PDF (§6) concentraba todo en una sola pantalla. Se dividió en pantallas con un solo propósito cada una (D-061):
 
-| Sección del wireframe original | Pantalla aprobada |
+| Sección del wireframe original | Pantalla final |
 |---|---|
 | Mi Viaje (Parámetros) | Crear viaje (§2) · Ajustes (§8) |
 | Recordatorio ON/OFF | Crear viaje, paso 3 · Ajustes |
@@ -99,7 +99,7 @@ Los montos y topes del presupuesto se ingresan en la divisa del viaje y la app m
 ┌───────────────────────────────────┐
 │ ← Roma · Día 2 de 5            ⚙  │
 │                                   │
-│ ┌ ☀ Buenos días ─────────────── ✕┐│  ← REQ-F-02 (v6), 1 vez al día
+│ ┌ ☀ Buenos días ─────────────── ✕┐│  ← REQ-F-02, 1 vez al día
 │ │ Para hoy en Roma tienes        ││
 │ │ disponible: $50.00 en Comida…  ││
 │ └────────────────────────────────┘│
@@ -151,7 +151,7 @@ Los montos y topes del presupuesto se ingresan en la divisa del viaje y la app m
 │                                   │
 │ [+ Agregar actividad]             │
 │                                   │
-│ ▸ Fuera del viaje (1)             │  ← plegable (REQ-F-13A v6)
+│ ▸ Fuera del viaje (1)             │  ← plegable (REQ-F-13A)  
 ├───────────────────────────────────┤
 │  Hoy   Itinerario  Gastos  Resumen│
 └───────────────────────────────────┘

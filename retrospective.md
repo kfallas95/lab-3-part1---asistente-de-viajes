@@ -26,7 +26,7 @@ En cuanto a lo técnico, la IA me propuso cómo organizar la app y yo revisé y 
 - **División de componentes:** el wireframe original tenía todo en una sola página, y lo dividimos en pantallas con un solo propósito (Hoy, Itinerario, Gastos, Resumen, Ajustes), más componentes reutilizables como la confirmación única de gastos.
 - **Organización en capas** y un **reloj central** para todas las reglas que dependen de la fecha de hoy.
 
-Todo quedó registrado en el `CLAUDE.md` con el motivo de cada decisión. Al final el `requirements.md` pasó de la versión 5 a la 6, y el contrato de datos de la versión 1 a la 2.
+Todo quedó registrado en el `CLAUDE.md` con el motivo de cada decisión. Al final, el `requirements.md` y el contrato de datos quedaron actualizados con todos esos cambios.
 
 ---
 
@@ -58,6 +58,5 @@ Sí. La IA me recomendó varias cosas que no se ajustaban a lo que yo quería ni
 - **Base de datos externa.** Entre las opciones, la IA me planteó usar una base de datos externa con backend. Decidí no usarla y quedarme con LocalStorage y un solo usuario por navegador, que es lo que pide el curso.
 - **Viajes con fechas pasadas.** Me recomendó permitirlos para registrar viajes anteriores. No lo permití, porque a esos viajes les faltarían datos y podían causar errores en otras partes.
 
-También simplificamos cosas que sobraban en el propio diseño. Por ejemplo, quitamos los límites diarios guardados, porque se pueden calcular en el momento, y eliminamos todo lo de "gastos fuera del viaje", porque con las demás reglas ese caso nunca podía pasar.
 
 Lo más importante de este proceso fue que **pude guiar a la IA hacia lo que yo quería**. No acepté todo lo que proponía: cuestioné varias de sus decisiones y le pedí aclaraciones cuando algo no me convencía. Por ejemplo, cuando me propuso dos opciones para el límite diario, ninguna me convencía del todo, así que le expliqué mis dudas y terminamos con una solución intermedia. Tampoco dejé que tomara decisiones por su cuenta: cada propuesta tenía que pasar por mí, y solo se registraba en el `CLAUDE.md` cuando yo la aprobaba, junto con el motivo.
