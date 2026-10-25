@@ -1,0 +1,419 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asistente-viajes.local/docs/data-contract.json",
+  "title": "Asistente de Viajes — Contrato de datos v2",
+  "description": "Contrato de datos aprobado (D-027) con los ajustes posteriores registrados en CLAUDE.md. Montos en USD expresados en centavos enteros (D-051). Los montos de GlobalBudget se guardan en su divisa original (D-096). Valores derivados (límites diarios, disponibles, TotalTripSpent, equivalentes USD) no se persisten (D-097, D-103).",
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "YYYY-MM-DD, fecha local del cliente (D-100)."
+    },
+    "time": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+      "description": "HH:MM, 24 horas."
+    },
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "description": "Validación estricta: se rechazan campos vacíos (INV-02)."
+    },
+    "currencyCode": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Divisa original. \"USD\" cuando el monto ya está en dólares (D-099)."
+    },
+    "exchangeRate": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Unidades de la divisa original por 1 USD: \"1 USD = X {divisa}\". Conversión: USD = monto ÷ X (D-067). Ingresada por el cliente (D-063). Vale 1 si la divisa es USD (D-099)."
+    },
+    "positiveAmount": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Monto > 0 en divisa original, decimal tal como lo ingresa el cliente (INV-01, D-006, D-096)."
+    },
+    "optionalPositiveAmount": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "exclusiveMinimum": 0,
+      "description": "Opcional; si se ingresa, debe ser > 0 (INV-17)."
+    },
+    "TripStatus": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "IN_PROGRESS",
+        "FINISHED"
+      ],
+      "description": "Asignado automáticamente según las fechas (D-032, D-100, D-106). UI: Planificado / En curso / Finalizado."
+    },
+    "ExpenseCategory": {
+      "type": "string",
+      "enum": [
+        "FOOD",
+        "TRANSPORT",
+        "ACTIVITIES",
+        "OTHER"
+      ],
+      "description": "Categorías permitidas en Expense (D-038). TICKETS y LODGING solo existen como montos de GlobalBudget (D-037). UI: Comida / Transporte / Actividades / Otros-Imprevistos."
+    },
+    "Trip": {
+      "type": "object",
+      "description": "Viaje (v1: Viaje / Mi Viaje).",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "place",
+        "country",
+        "startDate",
+        "endDate",
+        "preferences",
+        "status",
+        "isReminderActive"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "place": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "country": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "startDate": {
+          "$ref": "#/$defs/date",
+          "description": "Al crear o duplicar debe ser ≥ hoy (INV-28). startDate ≤ endDate (REQ-F-05). Sin cruce con otros viajes (INV-29)."
+        },
+        "endDate": {
+          "$ref": "#/$defs/date"
+        },
+        "preferences": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Opcional (D-045)."
+        },
+        "status": {
+          "$ref": "#/$defs/TripStatus"
+        },
+        "isReminderActive": {
+          "type": "boolean",
+          "default": true,
+          "description": "Interruptor del recordatorio matutino (D-023). Inicia en true (D-068). En OFF solo se apaga la notificación del navegador (D-035)."
+        }
+      }
+    },
+    "GlobalBudget": {
+      "type": "object",
+      "description": "Presupuesto del viaje, 1 por Trip (v1: Presupuesto). Montos en originalCurrency; sus equivalentes USD se derivan (D-096). Divisa fija tras crear el viaje (D-080).",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tripId",
+        "originalCurrency",
+        "exchangeRate",
+        "foodTotal",
+        "transportTotal",
+        "activitiesTotal",
+        "ticketsAmount",
+        "lodgingAmount",
+        "otherReserveAmount",
+        "totalAmount",
+        "foodExpenseCap",
+        "transportExpenseCap",
+        "activitiesExpenseCap"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "tripId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "originalCurrency": {
+          "$ref": "#/$defs/currencyCode"
+        },
+        "exchangeRate": {
+          "$ref": "#/$defs/exchangeRate"
+        },
+        "foodTotal": {
+          "$ref": "#/$defs/positiveAmount",
+          "description": "Monto total de Comida (D-024). Base de DailyFoodLimit (D-007)."
+        },
+        "transportTotal": {
+          "$ref": "#/$defs/positiveAmount"
+        },
+        "activitiesTotal": {
+          "$ref": "#/$defs/positiveAmount"
+        },
+        "ticketsAmount": {
+          "$ref": "#/$defs/optionalPositiveAmount",
+          "description": "Opcional (D-041). No editable durante el viaje (D-039)."
+        },
+        "lodgingAmount": {
+          "$ref": "#/$defs/optionalPositiveAmount",
+          "description": "Opcional (D-041). No editable durante el viaje (D-039)."
+        },
+        "otherReserveAmount": {
+          "$ref": "#/$defs/optionalPositiveAmount",
+          "description": "Fondo de Otros / Imprevistos (REQ-F-18). Opcional (D-025), editable durante el viaje (D-028); en FINISHED solo desde el aviso de un gasto OTHER (D-098)."
+        },
+        "totalAmount": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "readOnly": true,
+          "description": "DERIVADO, no editable: suma de los 6 montos en originalCurrency (D-024, INV-16)."
+        },
+        "foodExpenseCap": {
+          "$ref": "#/$defs/positiveAmount",
+          "description": "ExpenseCap: tope por gasto individual de Comida (D-013, D-014)."
+        },
+        "transportExpenseCap": {
+          "$ref": "#/$defs/positiveAmount"
+        },
+        "activitiesExpenseCap": {
+          "$ref": "#/$defs/positiveAmount"
+        }
+      }
+    },
+    "Activity": {
+      "type": "object",
+      "description": "Actividad del itinerario (v1: Actividad).",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tripId",
+        "title",
+        "type",
+        "date",
+        "dayNumber",
+        "startTime",
+        "endTime",
+        "location",
+        "estimatedCost",
+        "isDetached"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "tripId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Opcional, texto libre (D-044, D-111)."
+        },
+        "date": {
+          "$ref": "#/$defs/date",
+          "description": "Cualquier día dentro del viaje, incluidos días pasados (D-076)."
+        },
+        "dayNumber": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Calculado: date − startDate + 1."
+        },
+        "startTime": {
+          "$ref": "#/$defs/time"
+        },
+        "endTime": {
+          "$ref": "#/$defs/time",
+          "description": "Debe ser posterior a startTime (INV-21)."
+        },
+        "location": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "estimatedCost": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Centavos USD, ≥ 0 (INV-22, D-049)."
+        },
+        "isDetached": {
+          "type": "boolean",
+          "default": false,
+          "description": "true si quedó fuera del rango al acortar el viaje (REQ-F-13A v6)."
+        }
+      }
+    },
+    "Expense": {
+      "type": "object",
+      "description": "Gasto registrado (v1: Gasto).",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tripId",
+        "amount",
+        "originalAmount",
+        "originalCurrency",
+        "exchangeRate",
+        "category",
+        "concept",
+        "date"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "tripId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "amount": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "Centavos USD = round½↑(originalAmount ÷ exchangeRate × 100) (INV-25, D-067)."
+        },
+        "originalAmount": {
+          "$ref": "#/$defs/positiveAmount",
+          "description": "Monto tal como lo ingresa el cliente; solo referencia (D-052)."
+        },
+        "originalCurrency": {
+          "$ref": "#/$defs/currencyCode"
+        },
+        "exchangeRate": {
+          "$ref": "#/$defs/exchangeRate"
+        },
+        "category": {
+          "$ref": "#/$defs/ExpenseCategory"
+        },
+        "concept": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "Obligatorio (D-043)."
+        },
+        "date": {
+          "$ref": "#/$defs/date",
+          "description": "startDate ≤ date ≤ min(hoy, endDate) (D-055)."
+        }
+      }
+    },
+    "DailyForecastAlert": {
+      "type": "object",
+      "description": "Resumen matutino, 1 por Trip por día. Inmutable una vez creado (INV-26).",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "tripId",
+        "date",
+        "generatedAt",
+        "availableTodayFood",
+        "availableTodayTransport",
+        "availableTodayActivities",
+        "totalAvailableToday",
+        "assistantMessage"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "tripId": {
+          "$ref": "#/$defs/uuid"
+        },
+        "date": {
+          "$ref": "#/$defs/date"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Momento real de generación (D-100)."
+        },
+        "availableTodayFood": {
+          "type": "integer",
+          "description": "Centavos USD disponibles al generarse (D-082). Puede ser negativo."
+        },
+        "availableTodayTransport": {
+          "type": "integer"
+        },
+        "availableTodayActivities": {
+          "type": "integer"
+        },
+        "totalAvailableToday": {
+          "type": "integer"
+        },
+        "assistantMessage": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "Plantilla fija (D-033, D-083)."
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "Trip": {
+      "$ref": "#/$defs/Trip"
+    },
+    "GlobalBudget": {
+      "$ref": "#/$defs/GlobalBudget"
+    },
+    "Activity": {
+      "$ref": "#/$defs/Activity"
+    },
+    "Expense": {
+      "$ref": "#/$defs/Expense"
+    },
+    "DailyForecastAlert": {
+      "$ref": "#/$defs/DailyForecastAlert"
+    }
+  },
+  "examples": [
+    {
+      "Trip": {
+        "id": "7d2f1c9e-3b4a-4c8e-9f10-2a3b4c5d6e7f",
+        "name": "Roma 2026",
+        "place": "Roma",
+        "country": "Italia",
+        "startDate": "2026-11-05",
+        "endDate": "2026-11-09",
+        "preferences": null,
+        "status": "PLANNED",
+        "isReminderActive": true
+      },
+      "GlobalBudget": {
+        "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+        "tripId": "7d2f1c9e-3b4a-4c8e-9f10-2a3b4c5d6e7f",
+        "originalCurrency": "EUR",
+        "exchangeRate": 0.926,
+        "foodTotal": 463,
+        "transportTotal": 185.2,
+        "activitiesTotal": 231.5,
+        "ticketsAmount": 416.7,
+        "lodgingAmount": null,
+        "otherReserveAmount": 92.6,
+        "totalAmount": 1389,
+        "foodExpenseCap": 50,
+        "transportExpenseCap": 25,
+        "activitiesExpenseCap": 60
+      },
+      "Expense": {
+        "id": "9b8a7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+        "tripId": "7d2f1c9e-3b4a-4c8e-9f10-2a3b4c5d6e7f",
+        "amount": 4568,
+        "originalAmount": 42.3,
+        "originalCurrency": "EUR",
+        "exchangeRate": 0.926,
+        "category": "FOOD",
+        "concept": "Cena en Trastevere",
+        "date": "2026-11-06"
+      }
+    }
+  ]
+}
