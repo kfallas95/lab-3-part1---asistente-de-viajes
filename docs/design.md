@@ -20,7 +20,8 @@
 |---|---|
 | Aplicación web de una sola página (SPA), **mobile-first y responsive** | D-060 |
 | Persistencia **solo en LocalStorage**; un navegador corresponde a un cliente; sin backend ni autenticación | D-001, D-016 (requisito del curso) |
-| **Sin servicios externos**: la tasa de cambio la ingresa el cliente | D-063 |
+| **Sin servicios externos** | D-063 |
+| **Solo USD**: no se aceptan otras divisas ni hay conversión | D-120 |
 | **Sin inteligencia artificial**: el mensaje matutino usa una plantilla fija | D-033, D-083, D-114 |
 | La lógica de dominio no accede directamente a LocalStorage; usa **repositorios** | D-018 |
 | Cálculos en **USD, en centavos enteros**, con redondeo mitad hacia arriba | INV-05, D-051, D-053 |
@@ -34,7 +35,7 @@
 
 ### 2.1 Capas [D-101]
 
-La aplicación se organiza en cuatro capas. Cada capa solo depende de la que está debajo. La infraestructura implementa las interfaces que define el dominio, según el patrón repositorio [D-018].
+La aplicación se organiza en cinco capas. Las dependencias siguen la regla de la §4. La infraestructura implementa las interfaces que define el dominio, según el patrón repositorio [D-018].
 
 | Capa | Responsabilidad | No debe |
 |---|---|---|
@@ -48,7 +49,7 @@ La aplicación se organiza en cuatro capas. Cada capa solo depende de la que est
 flowchart TB
     subgraph UI["Capa UI"]
         SCR["Pantallas<br/>Mis viajes · Hoy · Itinerario · Gastos · Resumen · Ajustes"]
-        CMP["Componentes compartidos<br/>ConfirmDialog · CategoryCard · ExchangeRateInput …"]
+        CMP["Componentes compartidos<br/>ConfirmDialog · CategoryCard · MoneyInput …"]
     end
     subgraph ST["Capa de estado"]
         STORE["Store global en memoria"]
@@ -95,7 +96,7 @@ flowchart TB
 | `ExpenseRepository` | `getByTripId`, `save`, `delete`, `deleteByTripId` | `LocalStorageExpenseRepository` |
 | `ActivityRepository` | `getByTripId`, `save`, `saveMany`, `delete`, `deleteByTripId` | `LocalStorageActivityRepository` |
 | `ForecastAlertRepository` | `getByTripAndDate`, `getByTripId`, `create` (sin `update`, por INV-26), `deleteByTripId` | `LocalStorageForecastAlertRepository` |
-| `Clock` | `now()`, `today()` en hora local | `SystemClock` |
+| `Clock` | `now()`, `today()` en hora local | `SystemClock` (acepta `?today=`/`&time=` para pruebas manuales, D-123) |
 | `NotificationPort` | `requestPermission()`, `notify(title, body)` | `BrowserNotificationAdapter` (Notification API) |
 | `IdGenerator` | `newId()` (UUID) | Generador UUID del navegador |
 
@@ -170,7 +171,7 @@ flowchart TB
 | Componente | Contenido | Estados del viaje | Referencia |
 |---|---|---|---|
 | `TripListScreen` | Viajes agrupados: En curso / Planificados / Finalizados. Botón "+ Nuevo". Menú ⋯ con Duplicar y Eliminar. Estado vacío | — | §7.3, D-085 |
-| `TripCreateWizard` | Paso 1: Datos · Paso 2: Presupuesto (divisa, tasa, montos, topes) · Paso 3: Recordatorio | — | 8.2, D-070 |
+| `TripCreateWizard` | Paso 1: Datos · Paso 2: Presupuesto en USD (montos, topes) · Paso 3: Recordatorio | — | 8.2, D-070 |
 | `TripShell` | Contenedor responsive. Abre en la pestaña inicial según el estado: `PLANNED` → Itinerario, `IN_PROGRESS` → Hoy, `FINISHED` → Resumen | Todos | §7.1, D-061 |
 | `TodayScreen` | Resumen matutino, total disponible, una tarjeta por categoría diaria y las actividades de hoy. Variantes para `PLANNED` y `FINISHED` | Todos | §7.2, D-062 |
 | `ItineraryScreen` | Planificado frente a presupuesto, pestañas por día, lista de actividades y sección "Fuera del viaje" | Todos | §7.4, D-088, D-089 |
@@ -185,7 +186,7 @@ flowchart TB
 | `ConfirmDialog` | Muestra **un solo** aviso con **todos** los motivos de confirmación de la operación | INV-15 |
 | `CategoryCard` | "Te quedan $X" (número principal) y "de $Y" (secundario), con barra de progreso. Si el valor es negativo, se muestra en rojo con alerta | D-062, REQ-F-04B |
 | `OverBudgetAlert` | Indicador visual de sobrecosto reutilizable (tarjetas, resumen, itinerario) | REQ-F-04B, D-050 |
-| `ExchangeRateInput` | Campo con formato explícito `1 USD = [ X ] {divisa}`, prellenado y editable. Se oculta si la divisa es USD | D-064, D-067, D-099 |
+| `MoneyInput` | Campo de monto en USD: acepta hasta 2 decimales y entrega centavos enteros | D-120, D-121 |
 | `MoneyText` | Convierte centavos a "$1 234.50", siempre con 2 decimales | INV-25 |
 | `DayTabs` | Pestañas Día 1…N. Abre en el día de hoy si el viaje está `IN_PROGRESS`; si no, en el Día 1 | D-088 |
 | `CategoryChips` | Filtro Todos / Comida / Transporte / Actividades / Otros | D-090 |
@@ -211,7 +212,7 @@ src/
 ├── main.js                     # arranque: hidratación, eventos de tiempo (§5.2, §5.3)
 ├── domain/                     # Puro: sin navegador, sin LocalStorage, sin fecha del sistema
 │   ├── types                   # Trip, GlobalBudget, Activity, Expense, DailyForecastAlert, enums
-│   ├── money                   # centavos, redondeo ½↑, conversión (monto ÷ tasa)       INV-25, D-067
+│   ├── money                   # centavos, redondeo ½↑, dólares ↔ centavos             INV-25, D-121
 │   ├── dates                   # días totales, día relativo, rango, cruce de viajes      INV-04, INV-29
 │   ├── budgetCalculator        # límites, disponibles, TotalTripSpent, fondo, USD        D-007, INV-20
 │   ├── tripStatus              # estado según fechas                                     D-032, D-100
@@ -238,7 +239,7 @@ src/
     └── components              # componentes compartidos (§3.4)
 ```
 
-**Regla de dependencias:** `ui → state, application` · `application → domain` · `infrastructure → domain (ports)`. El dominio no importa nada de las demás capas.
+**Regla de dependencias [D-116]:** `ui → state, application` · `application → domain, state` · `state → domain` · `infrastructure → domain (ports)`. El dominio no importa nada de las demás capas.
 
 ---
 
@@ -249,7 +250,7 @@ src/
 | Tipo de dato | Dónde vive | ¿Persistido? | Ejemplos |
 |---|---|---|---|
 | **Entidades** | LocalStorage, como fuente de verdad, más una copia en el store | Sí | `Trip`, `GlobalBudget`, `Activity`, `Expense`, `DailyForecastAlert` |
-| **Derivados del dominio** | Selectores calculados desde el store | **No** | `Daily{Cat}Limit`, `Daily{Cat}Remaining`, `TotalTripSpent`, equivalentes USD del presupuesto, `totalAmount` en USD, saldo del fondo, suma planificada de actividades [D-097, D-042, D-096] |
+| **Derivados del dominio** | Selectores calculados desde el store | **No** | `Daily{Cat}Limit`, `Daily{Cat}Remaining`, `TotalTripSpent`, `totalAmount`, saldo del fondo, suma planificada de actividades, `Activity.dayNumber` [D-097, D-042, D-115, D-117] |
 | **Estado global de UI** | Store | No | Viaje abierto, pestaña activa, filtro de categoría, resumen matutino cerrado hoy |
 | **Estado local de UI** | Componente | No | Valores de formularios en edición, paso actual del wizard, diálogo abierto |
 
@@ -293,13 +294,14 @@ Todas las fórmulas viven en `domain/` y se usan desde los selectores y los serv
 
 | Función | Fórmula / regla | Referencia |
 |---|---|---|
-| `toUsdCents(amount, rate)` | `round½↑(amount ÷ rate × 100)`; con USD, `rate = 1` | INV-25, D-067, D-099 |
+| `toCents(dollars)` | `round½↑(dollars × 100)`; convierte lo que escribe el cliente a centavos | INV-25, D-121 |
 | `totalDays(trip)` | `endDate − startDate + 1` | INV-04 |
 | `dailyLimit(cat, today)` | `(Total cat USD − gastado en días anteriores a hoy) ÷ días restantes (incluido hoy)` | D-007, D-065, INV-10, INV-12 |
 | `dailyRemaining(cat, today)` | `dailyLimit − gastos de la categoría con fecha = hoy` | D-007, INV-07 |
 | `totalTripSpent(trip)` | `ticketsAmount + lodgingAmount + Σ Expense.amount` (nulos = 0) | INV-20 |
 | `reserveRemaining(trip)` | `otherReserveAmount − Σ gastos OTHER` | INV-13 |
 | `plannedActivitiesTotal(trip)` | `Σ estimatedCost` de actividades con `isDetached = false` | INV-24 |
+| `dayNumber(activity, trip)` | `activity.date − startDate + 1` (derivado, no persistido) | D-117 |
 | `statusFor(trip, today)` | `PLANNED` si hoy < inicio · `IN_PROGRESS` si inicio ≤ hoy ≤ fin · `FINISHED` si hoy > fin | D-032, D-100 |
 | `overlaps(a, b)` | Los rangos de fechas se cruzan | INV-29 |
 | `confirmationReasons(op)` | Lista de motivos: tope, disponible de hoy < 0, fondo < 0, categoría por debajo de lo gastado | INV-15 |
@@ -319,15 +321,15 @@ sequenceDiagram
     participant R as ExpenseRepository
     participant ST as store + selectores
 
-    C->>UI: Completa monto, divisa, tasa, categoría, concepto, fecha
+    C->>UI: Completa monto (USD), categoría, concepto, fecha
     UI->>S: registerExpense(input)
-    S->>D: validar (INV-01, INV-02, INV-18, D-038, D-055)
+    S->>D: validar (INV-01, INV-02, D-038, D-055)
     alt datos inválidos
         D-->>S: errores
         S-->>UI: rechazar
         UI-->>C: Mensaje de error, no se guarda
     else datos válidos
-        S->>D: toUsdCents(monto, tasa)
+        S->>D: toCents(monto)
         alt OTHER sin fondo
             S-->>UI: pedir crear fondo (D-031, D-098)
             UI-->>C: Aviso para crear fondo
@@ -407,7 +409,7 @@ flowchart LR
 
 | REQ | Resumen | UI | Aplicación | Dominio | Persistencia | Flujo / reglas |
 |---|---|---|---|---|---|---|
-| **REQ-F-01A** | Convertir a USD con la tasa ingresada por el cliente y calcular los días totales | `StepBudget`, `BudgetForm`, `ExchangeRateInput` | `tripService.create`, `budgetService.update` | `money.toUsdCents`, `dates.totalDays` | `BudgetRepository` guarda montos en divisa original + tasa (D-096) | 8.2, 8.7 · INV-04, INV-18, D-067 |
+| **REQ-F-01A** | Calcular los días totales (todo en USD, D-120) | `StepTripData`, `DatesForm` | `tripService.create`, `tripService.changeDates` | `dates.totalDays` | `TripRepository` | 8.2, 8.3 · INV-04 |
 | **REQ-F-01B** | Límite diario por categoría = monto ÷ días totales | `StepBudget` (vista previa), `CategoryCard` | — | `budgetCalculator.dailyLimit` (caso día 1) | No se persiste (D-097) | INV-06, D-007 |
 | **REQ-F-02** | Resumen matutino: notificación a las 08:00 si la app está abierta; si no, al abrirla | `MorningSummaryCard`, `ReminderToggle` | `forecastService.ensureTodayAlert` | `forecastMessage`, `budgetCalculator` | `ForecastAlertRepository.create` (inmutable) | 8.8 · D-034, D-035, D-082, D-083, INV-26 |
 | **REQ-F-03** | Recalcular el disponible al registrar, editar o eliminar un gasto; los gastos pasados ajustan el límite de hoy | `ExpenseForm`, `TodayScreen`, `ExpensesScreen` | `expenseService.register/update/delete` | `dailyLimit`, `dailyRemaining`, `totalTripSpent` | `ExpenseRepository` | 8.1, 8.4, 8.5 · D-054, D-055, D-056, D-065 |
@@ -419,7 +421,7 @@ flowchart LR
 | **REQ-F-13A** | Al acortar el viaje, desasociar las actividades fuera de rango y notificar | `DatesForm`, `ConfirmDialog` (listado), sección "Fuera del viaje" | `tripService.changeDates` | `dates.outOfRangeActivities` | `ActivityRepository.saveMany` (`isDetached = true`) | 8.3 · INV-11, D-089, D-094 |
 | **REQ-F-13B** | Recalcular la cuota diaria tras cambiar la duración | `TodayScreen` | `tripService.changeDates` | `dailyLimit` con los nuevos días restantes | No se persiste | 8.3 · INV-12, D-065 |
 | **REQ-F-18** | Gastos "Otros / Imprevistos" descuentan del fondo sin alterar las categorías diarias | `ExpenseForm`, `ReserveFundCard` | `expenseService.register` | `reserveRemaining` | `ExpenseRepository`, `BudgetRepository` (fondo) | 8.1 · INV-13, INV-19, D-031, D-098 |
-| **REQ-F-19** | Duplicar viaje | `TripActionsMenu`, `SettingsScreen` | `tripService.duplicate` | `dates` (día relativo, cruce) | Todos los repositorios del viaje nuevo | D-057, D-058, D-059, D-095, D-096 |
+| **REQ-F-19** | Duplicar viaje | `TripActionsMenu`, `SettingsScreen` | `tripService.duplicate` | `dates` (día relativo, cruce) | Todos los repositorios del viaje nuevo | D-057, D-058, D-059, D-095 |
 | **REQ-F-20** | Eliminar viaje con todos sus datos | `TripActionsMenu`, `SettingsScreen`, `ConfirmDialog` | `tripService.delete` | — | `deleteByTripId` en los 5 repositorios | 8.9 · D-086, D-087 |
 
 ### 8.2 Capacidades del PDF (§3) sin formato EARS
@@ -455,6 +457,10 @@ flowchart LR
 | **D-104** | Una clave de LocalStorage por colección, prefijo `travelAssistant:` y `schemaVersion` | Cierra el PENDIENTE de `CLAUDE.md` §9 |
 | **D-105** | Eventos de tiempo: al abrir o volver a primer plano, a las 00:00 y a las 08:00 | Implementa D-034 y D-100 sin backend |
 | **D-106** | `Trip.status` se recalcula y guarda en cada arranque y a medianoche | El estado depende de la fecha (D-032), pero está en el contrato |
+| **D-116** | Cinco capas; regla de dependencias completa: `application → state` y `state → domain` | Corrige §2.1 y §4 para que coincidan con el diagrama |
+| **D-120** | Solo USD: sin divisas ni conversión | Simplifica el alcance; decisión del autor |
+| **D-122** | Router por hash (`#/trip/{id}/today`…) | Funciona con Live Server sin configuración; recargar conserva la pantalla |
+| **D-123** | `SystemClock` acepta fecha simulada por URL | Permite verificar a mano estados, rollover y las 08:00 (D-112) |
 
 ---
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://asistente-viajes.local/docs/data-contract.json",
   "title": "Asistente de Viajes — Contrato de datos",
-  "description": "Contrato de datos (D-027) con los ajustes posteriores registrados en CLAUDE.md. Montos en USD expresados en centavos enteros (D-051). Los montos de GlobalBudget se guardan en su divisa original (D-096). Valores derivados (límites diarios, disponibles, totalAmount, TotalTripSpent, equivalentes USD) no se persisten (D-097, D-103, D-115).",
+  "description": "Contrato de datos (D-027) con los ajustes posteriores registrados en CLAUDE.md. Todos los montos son en USD (no se aceptan otras divisas, D-120) y se guardan en centavos enteros (D-051, D-121): 4050 = $40.50. Valores derivados (límites diarios, disponibles, totalAmount, TotalTripSpent, Activity.dayNumber) no se persisten (D-097, D-103, D-115, D-117).",
   "$defs": {
     "uuid": {
       "type": "string",
@@ -24,28 +24,18 @@
       "pattern": "\\S",
       "description": "Validación estricta: se rechazan campos vacíos (INV-02)."
     },
-    "currencyCode": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Divisa original. \"USD\" cuando el monto ya está en dólares (D-099)."
-    },
-    "exchangeRate": {
-      "type": "number",
-      "exclusiveMinimum": 0,
-      "description": "Unidades de la divisa original por 1 USD: \"1 USD = X {divisa}\". Conversión: USD = monto ÷ X (D-067). Ingresada por el cliente (D-063). Vale 1 si la divisa es USD (D-099)."
-    },
     "positiveAmount": {
-      "type": "number",
+      "type": "integer",
       "exclusiveMinimum": 0,
-      "description": "Monto > 0 en divisa original, decimal tal como lo ingresa el cliente (INV-01, D-006, D-096)."
+      "description": "Centavos USD > 0 (INV-01, D-006, D-121). La UI recibe dólares con hasta 2 decimales y los guarda como centavos."
     },
     "optionalPositiveAmount": {
       "type": [
-        "number",
+        "integer",
         "null"
       ],
       "exclusiveMinimum": 0,
-      "description": "Opcional; si se ingresa, debe ser > 0 (INV-17)."
+      "description": "Centavos USD; opcional; si se ingresa, debe ser > 0 (INV-17, D-121)."
     },
     "TripStatus": {
       "type": "string",
@@ -120,13 +110,11 @@
     },
     "GlobalBudget": {
       "type": "object",
-      "description": "Presupuesto del viaje, 1 por Trip. Montos en originalCurrency; sus equivalentes USD se derivan (D-096). Divisa fija tras crear el viaje (D-080). totalAmount (suma de las 6 categorías) es un valor derivado y no se persiste (D-115).",
+      "description": "Presupuesto del viaje, 1 por Trip. Montos en centavos USD (D-120, D-121). totalAmount (suma de las 6 categorías) es un valor derivado y no se persiste (D-115).",
       "additionalProperties": false,
       "required": [
         "id",
         "tripId",
-        "originalCurrency",
-        "exchangeRate",
         "foodTotal",
         "transportTotal",
         "activitiesTotal",
@@ -143,12 +131,6 @@
         },
         "tripId": {
           "$ref": "#/$defs/uuid"
-        },
-        "originalCurrency": {
-          "$ref": "#/$defs/currencyCode"
-        },
-        "exchangeRate": {
-          "$ref": "#/$defs/exchangeRate"
         },
         "foodTotal": {
           "$ref": "#/$defs/positiveAmount",
@@ -194,7 +176,6 @@
         "title",
         "type",
         "date",
-        "dayNumber",
         "startTime",
         "endTime",
         "location",
@@ -220,12 +201,7 @@
         },
         "date": {
           "$ref": "#/$defs/date",
-          "description": "Cualquier día dentro del viaje, incluidos días pasados (D-076)."
-        },
-        "dayNumber": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Calculado: date − startDate + 1."
+          "description": "Cualquier día dentro del viaje, incluidos días pasados (D-076). El día relativo (date − startDate + 1) se deriva y no se persiste (D-117)."
         },
         "startTime": {
           "$ref": "#/$defs/time"
@@ -240,7 +216,7 @@
         "estimatedCost": {
           "type": "integer",
           "minimum": 0,
-          "description": "Centavos USD, ≥ 0 (INV-22, D-049)."
+          "description": "Centavos USD, ≥ 0 (INV-22, D-049, D-120)."
         },
         "isDetached": {
           "type": "boolean",
@@ -257,9 +233,6 @@
         "id",
         "tripId",
         "amount",
-        "originalAmount",
-        "originalCurrency",
-        "exchangeRate",
         "category",
         "concept",
         "date"
@@ -274,17 +247,7 @@
         "amount": {
           "type": "integer",
           "exclusiveMinimum": 0,
-          "description": "Centavos USD = round½↑(originalAmount ÷ exchangeRate × 100) (INV-25, D-067)."
-        },
-        "originalAmount": {
-          "$ref": "#/$defs/positiveAmount",
-          "description": "Monto tal como lo ingresa el cliente; solo referencia (D-052)."
-        },
-        "originalCurrency": {
-          "$ref": "#/$defs/currencyCode"
-        },
-        "exchangeRate": {
-          "$ref": "#/$defs/exchangeRate"
+          "description": "Centavos USD (INV-25, D-120, D-121)."
         },
         "category": {
           "$ref": "#/$defs/ExpenseCategory"
@@ -383,25 +346,20 @@
       "GlobalBudget": {
         "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
         "tripId": "7d2f1c9e-3b4a-4c8e-9f10-2a3b4c5d6e7f",
-        "originalCurrency": "EUR",
-        "exchangeRate": 0.926,
-        "foodTotal": 463,
-        "transportTotal": 185.2,
-        "activitiesTotal": 231.5,
-        "ticketsAmount": 416.7,
+        "foodTotal": 50000,
+        "transportTotal": 20000,
+        "activitiesTotal": 25000,
+        "ticketsAmount": 45000,
         "lodgingAmount": null,
-        "otherReserveAmount": 92.6,
-        "foodExpenseCap": 50,
-        "transportExpenseCap": 25,
-        "activitiesExpenseCap": 60
+        "otherReserveAmount": 10000,
+        "foodExpenseCap": 4000,
+        "transportExpenseCap": 2500,
+        "activitiesExpenseCap": 6000
       },
       "Expense": {
         "id": "9b8a7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
         "tripId": "7d2f1c9e-3b4a-4c8e-9f10-2a3b4c5d6e7f",
         "amount": 4568,
-        "originalAmount": 42.3,
-        "originalCurrency": "EUR",
-        "exchangeRate": 0.926,
         "category": "FOOD",
         "concept": "Cena en Trastevere",
         "date": "2026-11-06"

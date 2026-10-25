@@ -70,26 +70,26 @@ Sin viajes: *"Aún no tienes viajes"* + botón **Crear mi primer viaje**.
 ```text
  Paso 1 de 3 · Datos              Paso 2 de 3 · Presupuesto          Paso 3 de 3 · Recordatorio
 ┌─────────────────────────┐      ┌───────────────────────────┐      ┌─────────────────────────┐
-│ Nombre   [Roma 2026   ] │      │ Divisa  [EUR ▾]           │      │ Resumen matutino        │
-│ Lugar    [Roma        ] │      │ 1 USD = [0.926] EUR       │      │ a las 08:00             │
+│ Nombre   [Roma 2026   ] │      │ Montos en USD             │      │ Resumen matutino        │
+│ Lugar    [Roma        ] │      │                           │      │ a las 08:00             │
 │ País     [Italia      ] │      │                           │      │                 [ ON ]  │
 │ Inicio   [2026-11-05  ] │      │ DIARIAS        Total  Tope│      │                         │
-│ Fin      [2026-11-09  ] │      │ Comida      [463 ] [50 ]  │      │ Te pediremos permiso    │
-│ + Agregar preferencias  │      │ Transporte [185.2] [25 ]  │      │ para mostrar            │
-│                         │      │ Actividades[231.5] [60 ]  │      │ notificaciones.         │
+│ Fin      [2026-11-09  ] │      │ Comida      [500 ] [40 ]  │      │ Te pediremos permiso    │
+│ + Agregar preferencias  │      │ Transporte  [200 ] [25 ]  │      │ para mostrar            │
+│                         │      │ Actividades [250 ] [60 ]  │      │ notificaciones.         │
 │ Duración: 5 días        │      │                           │      │                         │
 │                         │      │ OPCIONALES                │      │                         │
-│                         │      │ Tiquetes    [416.70]      │      │                         │
+│                         │      │ Tiquetes    [450 ]        │      │                         │
 │                         │      │ Hospedaje   [      ]      │      │                         │
-│                         │      │ Imprevistos [ 92.60]      │      │                         │
+│                         │      │ Imprevistos [100 ]        │      │                         │
 │                         │      │                           │      │                         │
-│                         │      │ Total: €1 389 ≈ $1 500.00 │      │                         │
+│                         │      │ Total: $1 500.00          │      │                         │
 │                         │      │ Límite diario Comida $100 │      │                         │
 │          [Siguiente →]  │      │ [← Atrás] [Siguiente →]   │      │ [← Atrás]   [Guardar]   │
 └─────────────────────────┘      └───────────────────────────┘      └─────────────────────────┘
 ```
 
-Los montos y topes del presupuesto se ingresan en la divisa del viaje y la app muestra su equivalente en USD (D-096). Validaciones visibles: campos obligatorios (INV-02), inicio ≥ hoy (INV-28), inicio ≤ fin (REQ-F-05), sin cruce con otro viaje (INV-29), montos > 0 (REQ-F-06).
+Todos los montos y topes se ingresan en USD; no se aceptan otras divisas (D-120). Validaciones visibles: campos obligatorios (INV-02), inicio ≥ hoy (INV-28), inicio ≤ fin (REQ-F-05), sin cruce con otro viaje (INV-29), montos > 0 (REQ-F-06).
 
 ---
 
@@ -167,7 +167,6 @@ Los montos y topes del presupuesto se ingresan en la divisa del viaje y la app m
 │                                   │
 │ HOY · 6 nov              $57.68   │
 │ 🍽 Cena en Trastevere    $45.68   │
-│    €42.30 · 1 USD = 0.926 EUR     │
 │ 🚕 Taxi al Coliseo       $12.00   │
 │                                   │
 │ AYER · 5 nov             $95.10   │
@@ -189,9 +188,7 @@ Este wireframe se deriva de los campos y reglas del flujo 8.1; no tiene una deci
 ┌───────────────────────────────────┐
 │ Nuevo gasto                    ✕  │
 │                                   │
-│ Monto      [ 42.30 ]  Divisa [EUR▾]
-│ 1 USD = [ 0.926 ] EUR             │  ← prellenada, editable (D-064, D-067)
-│ ≈ $45.68                          │
+│ Monto (USD) [ 45.68 ]             │  ← solo USD (D-120)
 │                                   │
 │ Categoría  (•)Comida ( )Transporte│
 │            ( )Actividades ( )Otros│
@@ -208,8 +205,8 @@ Confirmación única cuando hay motivos (INV-15):
 ┌───────────────────────────────────┐
 │ ¿Confirmas este gasto?            │
 │                                   │
-│ • Supera tu tope de €50.00        │
-│   (≈ $54.00) en Comida.           │
+│ • Supera tu tope de $40.00        │
+│   en Comida.                      │
 │ • Deja tu disponible de Comida de │
 │   hoy en −$15.68.                 │
 │                                   │

@@ -9,7 +9,7 @@ Aplicación web para **planificar viajes y controlar el presupuesto día a día*
 ## Funcionalidades principales
 
 - **Mis viajes:** crear, duplicar y eliminar viajes, sin fechas superpuestas.
-- **Presupuesto por categoría** en cualquier divisa, con conversión a USD usando la tasa que ingresa el cliente (`1 USD = X {divisa}`).
+- **Presupuesto por categoría** en USD (no se aceptan otras divisas).
 - **Límite diario dinámico:** `(Total de la categoría − gastado en días anteriores) ÷ días restantes`.
 - **Registro de gastos** con tope por gasto (`ExpenseCap`) y una sola confirmación cuando un gasto excede el tope o el disponible.
 - **Alertas visuales de sobrecosto**, sin notificaciones por cada gasto.

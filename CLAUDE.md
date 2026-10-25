@@ -92,7 +92,7 @@ Transiciones automáticas por fecha local del cliente (D-032):
 | INV-02 | Campos vacíos se rechazan (validación estricta). Campos opcionales (única excepción): `Trip.preferences`, `GlobalBudget.ticketsAmount`, `lodgingAmount`, `otherReserveAmount`, `Activity.type`. | D-025, D-041, D-043, D-044, D-045 |
 | INV-03 | `Fecha Inicio ≤ Fecha Fin`. Si no, se bloquea el guardado con mensaje de error. | `[REQ-F-05]` |
 | INV-04 | `Días Totales = Fecha Fin − Fecha Inicio + 1` | `[REQ-F-01A]` |
-| INV-05 | Todos los registros financieros se procesan y unifican en **USD**. Montos de presupuesto y de gastos en otra divisa se convierten con la tasa ingresada por el cliente (INV-18). | `[PDF §3]` `[REQ-F-01A]` — D-022, D-063 |
+| INV-05 | Todos los montos se ingresan, guardan y calculan en **USD**. No se aceptan otras divisas ni hay conversión. | `[PDF §3]` — D-120 |
 | INV-06 | `Límite Diario (categoría) = Monto asignado a la categoría / Días Totales` | `[REQ-F-01B]` |
 | INV-07 | `Daily{Categoría}Remaining = Daily{Categoría}Limit − Gastos de la categoría del día`. Se recalcula al registrar, editar o eliminar un gasto (incluidos gastos de días anteriores, D-054). | `[REQ-F-03]` — D-007, D-054 |
 | INV-08 | Un gasto que excede el límite **se permite** (con confirmación del usuario) y el disponible queda negativo. | `[REQ-F-04A]` |
@@ -103,16 +103,14 @@ Transiciones automáticas por fecha local del cliente (D-032):
 | INV-13 | Gastos en "Otros / Imprevistos" se descuentan del fondo global de reserva sin alterar balances ni cuotas de las categorías principales. | `[REQ-F-18]` |
 | INV-14 | **`ExpenseCap` (tope por gasto individual):** obligatorio, definido por viaje, uno para cada categoría diaria (Comida, Transporte, Actividades). Si el cliente registra un gasto mayor al `ExpenseCap` de su categoría, el sistema le pide confirmación en pantalla (sin notificación, D-008). Debe ser > 0 (INV-01), puede ser mayor que `Daily{Categoría}Limit` y es editable durante el viaje. | D-012, D-013, D-014 |
 | INV-15 | **Confirmación única:** todos los motivos de confirmación de una operación se muestran en **un solo** aviso que los enumera. Motivos posibles: gasto mayor al `ExpenseCap` (INV-14); `Daily{Categoría}Remaining` de hoy queda negativo (D-065); fondo de imprevistos queda negativo (INV-19); monto de categoría por debajo de lo ya gastado (D-079). Si el cliente confirma, se guarda (INV-08); si cancela, no se registra. | D-015, D-031, D-065, D-079 |
-| INV-16 | `totalAmount` (derivado, no persistido; D-115) = suma de los montos por categoría (en divisa original; su equivalente USD = total ÷ `exchangeRate`); el cliente no lo edita. Si el cliente cambia la tasa del presupuesto, todo el presupuesto se reconvierte; los gastos conservan su propia tasa. | D-024, D-096 |
+| INV-16 | `totalAmount` (derivado, no persistido; D-115) = suma de los montos por categoría, en centavos USD; el cliente no lo edita. | D-024, D-120 |
 | INV-17 | `otherReserveAmount`, `ticketsAmount` y `lodgingAmount` son **opcionales** (excepción a INV-02). Si se ingresan, deben ser > 0 (INV-01). `otherReserveAmount` se puede crear o ajustar durante el viaje; `ticketsAmount` y `lodgingAmount` no (D-039). Cualquier cambio recalcula `totalAmount` (INV-16). | D-025, D-028, D-041 |
-| INV-18 | **Tasa de cambio (D-063, D-064):** la ingresa manualmente el cliente; no se usan servicios externos. Debe ser > 0. Se maneja por viaje y por divisa: al registrar un monto en otra divisa, el campo se prellena con la última tasa usada en ese viaje para esa divisa (derivada de los registros existentes, sin campo nuevo) y es editable; la tasa editada pasa a ser la predeterminada. Montos en USD no piden tasa; se guardan con `originalCurrency = "USD"`, `originalAmount` = monto y `exchangeRate = 1` (D-099). **Formato: "1 USD = X {divisa}"**; conversión `USD = monto ÷ X` (D-067). La tasa usada se registra en `exchangeRate`. | D-063 (reemplaza D-030) |
 | INV-19 | **Gasto `OTHER` (D-031):** si no existe fondo de imprevistos, la app pide crearlo en ese momento. Si el gasto deja el fondo en negativo, se pide confirmación (mismo criterio que INV-15) y se permite. | D-031 |
 | INV-20 | `TotalTripSpent = ticketsAmount + lodgingAmount + Σ Expense.amount` (montos opcionales nulos cuentan como 0). Se calcula bajo demanda; no se persiste. | D-042 |
 | INV-21 | `Activity.endTime` debe ser estrictamente posterior a `Activity.startTime`. | D-047 |
 | INV-22 | `Activity.estimatedCost` debe ser **≥ 0** (se admite 0 para actividades gratuitas). Excepción explícita a INV-01, que aplica solo a presupuestos y gastos. | D-049 |
-| ~~INV-23~~ | **Obsoleta por D-094:** ningún gasto puede quedar fuera del rango, por lo que no hay gastos desasociados que decidir. | D-094 |
 | INV-24 | **Planificado vs presupuesto de Actividades:** la UI muestra la suma de `estimatedCost` de las actividades no desasociadas frente a `activitiesTotal`. Si la suma lo supera, se muestra una alerta visual; no se bloquea. | D-050 |
-| INV-25 | **Precisión monetaria:** montos en USD como centavos enteros. Se muestran con 2 decimales. Las divisiones (límite diario) y conversiones de divisa se redondean al centavo; la tasa no se redondea. Regla: mitad hacia arriba (D-053). El residuo de redondeo se corrige solo con el recálculo diario de D-007. | D-051 |
+| INV-25 | **Precisión monetaria:** montos en USD como centavos enteros. Se muestran con 2 decimales. Las divisiones (límite diario) se redondean al centavo. Regla: mitad hacia arriba (D-053). El residuo de redondeo se corrige solo con el recálculo diario de D-007. | D-051 |
 | INV-26 | Los `DailyForecastAlert` ya generados son inmutables: correcciones posteriores de gastos no los modifican. | D-054 |
 | INV-27 | **Edición de montos por categoría durante el viaje:** al cambiar `foodTotal`, `transportTotal` o `activitiesTotal`, el límite diario de esa categoría se recalcula de inmediato desde hoy (D-007). `totalAmount` se recalcula (INV-16). | D-065 |
 | INV-28 | Al **crear** o **duplicar** un viaje, `startDate` debe ser ≥ fecha actual. No se permiten viajes con fechas pasadas. Si `startDate` = hoy, el viaje se crea en `IN_PROGRESS` (D-032). | D-069 |
@@ -144,7 +142,7 @@ Antecedente: la fórmula original (D-003), `(Total Comida / Días Totales) − A
 |---|---|
 | Resumen matutino de disponibilidad: ver REQ-F-02 en `docs/requirements.md`. | `[REQ-F-02]` |
 | Ejemplo de mensaje: *"¡Buenos días! Para hoy en Roma tienes disponible: $50 en Comida, $15 en Transporte y $40 en Actividades. Total disponible hoy: $105 USD."* | `[PDF §4]` |
-| ~~El corte diario (rollover) ocurre a las 08:00 AM~~ → **el día cambia a las 00:00** (hora local) para límites, estado del viaje y fechas de gastos; las 08:00 solo determinan cuándo se muestra el resumen (D-100). | `[REQ-F-03B]` — D-100 |
+| **El día cambia a las 00:00** (hora local) para límites, estado del viaje y fechas de gastos; las 08:00 solo determinan cuándo se muestra el resumen (D-100). | `[REQ-F-03B]` — D-100 |
 | **Mecanismo de entrega (D-034, opción C):** si la app está abierta a las 08:00, se emite una notificación del navegador (requiere permiso del cliente); si está cerrada, el resumen del día se muestra en pantalla la primera vez que el cliente abre la app después de las 08:00. | D-034 |
 | **Rollover calculado bajo demanda:** el límite del día no depende de un proceso que corra a las 08:00; se calcula con la fórmula de D-007 a partir de la fecha y los gastos registrados cuando la app se abre o está activa. | D-007, D-034 |
 | Motivo: sin backend (D-016) no es posible garantizar notificaciones con la app cerrada. Si en el futuro hay backend, se reevalúa. | D-034 |
@@ -160,7 +158,7 @@ La especificación completa y vigente está en **`docs/requirements.md`** (sinta
 
 ### 6.1 Contrato de datos (D-027)
 
-Versión formal en `docs/data-contract.json`. Cálculos siempre en USD (INV-05, D-022), **expresados en centavos enteros** (D-051): `4050` = $40.50. Se guardan en centavos USD: `Expense.amount`, `Activity.estimatedCost`, `DailyForecastAlert`. Los montos de `GlobalBudget` se guardan en su divisa original y se derivan a centavos USD (D-096). `exchangeRate` se guarda con todos sus decimales. `Expense.originalAmount` se guarda en decimal tal como lo ingresa el cliente (solo referencia, no entra en cálculos; D-052). `Activity.estimatedCost` en USD por `[PDF §3]` (todos los registros financieros en USD). Fechas `YYYY-MM-DD`, horas `HH:MM`, IDs UUID.
+Versión formal en `docs/data-contract.json`. Todos los montos son en USD (INV-05, D-120) y se guardan **en centavos enteros** (D-051, D-121): `4050` = $40.50. Fechas `YYYY-MM-DD`, horas `HH:MM`, IDs UUID.
 
 ```jsonc
 // Trip
@@ -180,10 +178,7 @@ Versión formal en `docs/data-contract.json`. Cálculos siempre en USD (INV-05, 
 {
   "id": "uuid",
   "tripId": "uuid",
-  "originalCurrency": "string",      // REQ-F-01A
-  "exchangeRate": "number",          // REQ-F-01A — ingresada por el cliente (D-063); unidades de originalCurrency por 1 USD (D-067); 1 si USD (D-099)
-  // Montos del presupuesto en originalCurrency, decimal tal como los ingresa el cliente (D-096).
-  // Su equivalente en USD (centavos) se deriva: monto ÷ exchangeRate, redondeo ½↑ (INV-25).
+  // Montos en centavos USD (D-120, D-121).
   "foodTotal": "number",             // D-007, D-024
   "transportTotal": "number",
   "activitiesTotal": "number",
@@ -202,11 +197,10 @@ Versión formal en `docs/data-contract.json`. Cálculos siempre en USD (INV-05, 
   "title": "string",
   "type": "string | null",           // OPCIONAL (D-044); texto libre (D-111)
   "date": "date",
-  "dayNumber": "number",
   "startTime": "time",
   "endTime": "time",
   "location": "string",
-  "estimatedCost": "number",         // ≥ 0 (D-049)
+  "estimatedCost": "number",         // centavos USD, ≥ 0 (D-049)
   "isDetached": "boolean"            // REQ-F-13A
 }
 
@@ -214,10 +208,7 @@ Versión formal en `docs/data-contract.json`. Cálculos siempre en USD (INV-05, 
 {
   "id": "uuid",
   "tripId": "uuid",
-  "amount": "number",                // en USD (D-022, D-026)
-  "originalAmount": "number",        // D-026
-  "originalCurrency": "string",      // D-026
-  "exchangeRate": "number",          // D-026 — unidades de originalCurrency por 1 USD (D-067)
+  "amount": "number",                // centavos USD (D-120, D-121)
   "category": "ExpenseCategory",     // FOOD | TRANSPORT | ACTIVITIES | OTHER (D-020, D-038)
   "concept": "string",
   "date": "date"
@@ -237,7 +228,7 @@ Versión formal en `docs/data-contract.json`. Cálculos siempre en USD (INV-05, 
 }
 ```
 
-**No se persisten** (se calculan en el momento): `DailyFoodRemaining`, `DailyTransportRemaining`, `DailyActivitiesRemaining` (D-007, D-010), `TotalTripSpent` (D-042), `totalAmount` (D-115), `DailyFoodLimit`, `DailyTransportLimit`, `DailyActivitiesLimit` (D-097), equivalentes en USD de los montos de `GlobalBudget` (D-096).
+**No se persisten** (se calculan en el momento): `DailyFoodRemaining`, `DailyTransportRemaining`, `DailyActivitiesRemaining` (D-007, D-010), `TotalTripSpent` (D-042), `totalAmount` (D-115), `DailyFoodLimit`, `DailyTransportLimit`, `DailyActivitiesLimit` (D-097), `Activity.dayNumber` (D-117).
 
 
 ---
@@ -248,7 +239,7 @@ Versión formal en `docs/data-contract.json`. Cálculos siempre en USD (INV-05, 
 |---|---|---|
 | Mi Viaje / Parámetros | Guardar y reutilizar datos de viajes | `Trip.place`, `country`, `startDate`… |
 | Recordatorio | Activar/desactivar alarma matutina | `Trip.isReminderActive` (D-023) |
-| Itinerario (Simulación por días) | Itinerario editable diario | `Activity.dayNumber`, `estimatedCost` |
+| Itinerario (Simulación por días) | Itinerario editable diario | `Activity.date` (día relativo derivado, D-117), `estimatedCost` |
 | Presupuestos (Categorías) | Límites diarios vs. logísticos | `Daily*Limit` (calculados) / `ticketsAmount`, `lodgingAmount` |
 
 Navegación del wireframe: `[ Itinerario ]` `[ Resumen B ]` — era solo un ejemplo `[Autor]`; la navegación se redefine (Q-07). Plataforma: mobile-first y responsive (D-060).
@@ -310,7 +301,7 @@ Según estado:
 
 - Filtro por categoría con chips: Todos · Comida · Transporte · Actividades · Otros.
 - Agrupados por día (más reciente primero) con total del día.
-- Cada gasto: ícono de categoría · `concept` · monto USD. Si divisa ≠ USD: `originalAmount` + tasa usada ("1 USD = X {divisa}").
+- Cada gasto: ícono de categoría · `concept` · monto USD.
 - Tocar un gasto → editar (8.4) o eliminar (8.5).
 
 
@@ -339,14 +330,13 @@ Según estado:
 [Cliente toca (+)]
  0. Precondición: viaje IN_PROGRESS o FINISHED (REQ-F-03).
     PLANNED → botón (+) desactivado: "Podrás registrar gastos cuando inicie tu viaje".
- 1. Formulario: monto, divisa, tasa (solo si divisa ≠ USD, prellenada; D-064), categoría, concepto, fecha.
+ 1. Formulario: monto en USD (D-120), categoría, concepto, fecha.
  2. Validación estricta — si falla: mensaje de error, no se guarda.
     · campos obligatorios (INV-02, D-043)
-    · monto > 0 (INV-01) · tasa > 0 si aplica (INV-18)
+    · monto > 0 (INV-01)
     · categoría ∈ FOOD | TRANSPORT | ACTIVITIES | OTHER (D-038)
     · startDate ≤ fecha ≤ min(hoy, endDate) (D-055)
- 3. Conversión: amount (centavos USD) = redondear½↑(monto ÷ tasa), con la tasa expresada como
-    "1 USD = X {divisa}" (D-067, INV-25). Ej.: ₡5 000 ÷ 510 = $9.80.
+ 3. amount = monto en centavos USD (D-121). Ej.: $45.68 → 4568.
  4. Verificaciones (generan "motivos" de confirmación):
     · OTHER: si no existe fondo → pedir crearlo (D-031; también en FINISHED, D-098); si el cliente no lo crea → no se guarda y vuelve
       al formulario. Si el gasto deja el fondo < 0 → motivo (INV-19).
@@ -375,14 +365,14 @@ Según estado:
           Validar: obligatorios (INV-02) · startDate ≥ hoy (INV-28) · startDate ≤ endDate (REQ-F-05)
                   · sin cruce con otros viajes (INV-29).
           Mostrar: duración en días (INV-04).
- Paso 2 · Presupuesto: divisa + tasa "1 USD = [ ] X" si ≠ USD (D-067).
+ Paso 2 · Presupuesto en USD (D-120).
           Comida, Transporte, Actividades: obligatorios > 0 (INV-01).
           ExpenseCap de cada una: obligatorio > 0 (D-013, D-014).
           Tiquetes, Hospedaje, Imprevistos: opcionales, > 0 si se ingresan (INV-17).
           Mostrar en vivo: totalAmount (INV-16) y límite diario por categoría (INV-06).
  Paso 3 · Recordatorio: ON por defecto (D-068); al activarlo se pide permiso de notificaciones.
  [Guardar]
-   · Convertir a centavos USD: monto ÷ tasa, redondeo ½↑ (INV-25).
+   · Guardar los montos en centavos USD (D-121).
    · Estado según fechas: PLANNED, o IN_PROGRESS si startDate = hoy (D-032, INV-28).
    · Guardar vía TripRepository (D-018).
    · Abrir el viaje en su pestaña inicial (D-061).
@@ -437,7 +427,7 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
    · startDate ≤ date ≤ endDate, incluidos días pasados del viaje (D-076)
    · endTime > startTime (INV-21) · estimatedCost ≥ 0 (INV-22)
    · horarios cruzados entre actividades: permitidos, sin aviso (D-077)
- Calcular: dayNumber = date − startDate + 1.
+ estimatedCost en USD (D-120). El día relativo (date − startDate + 1) se deriva (D-117).
  Guardar vía repositorio (D-018).
  Recalcular: suma planificada vs activitiesTotal; alerta visual si se excede (D-050). No afecta saldos.
  Eliminar: confirmación simple "¿Eliminar '{title}'?".
@@ -452,8 +442,7 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
    · IN_PROGRESS: editables montos por categoría diaria (INV-27), ExpenseCap (D-014) y
                   otherReserveAmount (D-028). ticketsAmount y lodgingAmount bloqueados (D-039).
    · FINISHED: presupuesto bloqueado (D-081), salvo crear/ajustar otherReserveAmount desde el aviso de un gasto OTHER (D-098).
- originalCurrency fija tras crear el viaje; las ediciones se ingresan en esa divisa con la tasa
- prellenada y editable (D-080, D-064).
+ Montos en USD (D-120).
  Validar: mismas reglas que 8.2 (INV-01, INV-17, D-013).
  Si un monto por categoría queda por debajo de lo ya gastado → motivo en la confirmación única:
    "Ya gastaste $X; tu disponible de {categoría} quedará en negativo" (D-079, INV-15).
@@ -525,15 +514,13 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
 | D-019 | Idioma: inglés en código, contrato de datos y lenguaje ubicuo; español en la interfaz de usuario. Resuelve el núcleo de C-05. | 2026-10-24 |
 | D-020 | Mapeo: Viaje→`Trip`, Presupuesto→`GlobalBudget`, Gasto→`Expense`, Actividad→`Activity`, AlertaPrevisionDiaria→`DailyForecastAlert`. Convención: `PascalCase` entidades, `camelCase` campos, `UPPER_SNAKE_CASE` enumeraciones. Categorías: `FOOD`, `TRANSPORT`, `ACTIVITIES`, `TICKETS`, `LODGING`, `OTHER`. Resuelve C-05. | 2026-10-24 |
 | D-021 | Se elimina `Trip.finalBudget`; es el mismo dato que `GlobalBudget.totalAmount`. | 2026-10-24 |
-| D-022 | Los `Expense` registrados en una divisa distinta de USD se convierten a USD (extiende INV-05 a gastos). | 2026-10-24 |
 | D-023 | El interruptor del recordatorio matutino (ON/OFF) pasa a `Trip`, uno por viaje; deja de estar en `DailyForecastAlert`. | 2026-10-24 |
 | D-024 | El cliente ingresa el monto de cada categoría; `totalAmount` se calcula como la suma y no se edita. Resuelve Q-23. | 2026-10-24 |
 | D-025 | `otherReserveAmount` (Otros / Imprevistos) es opcional. | 2026-10-24 |
-| D-026 | Nombres definidos: `Expense.amount` (USD), `originalAmount`, `originalCurrency`, `exchangeRate`; `Trip.isReminderActive`. Resuelve Q-21 y Q-22. | 2026-10-24 |
+| D-026 | Nombres definidos: `Expense.amount` (centavos USD) y `Trip.isReminderActive`. Resuelve Q-21 y Q-22. | 2026-10-24 |
 | D-027 | Contrato de datos definido (sección 6.1). Resuelve C-03. | 2026-10-24 |
 | D-028 | `otherReserveAmount` se puede crear o ajustar durante el viaje, porque también funciona como imprevisto. | 2026-10-24 |
 | D-029 | Estados del viaje: `PLANNED`, `IN_PROGRESS`, `FINISHED`. "En Curso" de REQ-F-02 = `IN_PROGRESS` (etiqueta UI "En curso", D-019). Resuelve Q-04. | 2026-10-24 |
-| ~~D-030~~ | **Reemplazada por D-063.** Tasa de cambio: opción C — API externa con respaldo (última tasa guardada en `LocalStorage` o ingreso manual del cliente). Resuelve Q-02. | 2026-10-24 |
 | D-031 | Gasto `OTHER` sin fondo: la app pide crear el fondo en ese momento. Si el gasto deja el fondo negativo, se pide confirmación y se permite. Resuelve Q-24. | 2026-10-24 |
 | D-032 | Transiciones de `TripStatus` automáticas por fecha: `IN_PROGRESS` en `startDate`, `FINISHED` al día siguiente de `endDate`. Resuelve Q-25. | 2026-10-24 |
 | D-033 | "IA" es solo parte del nombre del producto; no hay funcionalidad de inteligencia artificial. `assistantMessage` se genera con una plantilla fija (ej. `[PDF §4]`). Resuelve Q-06. | 2026-10-24 |
@@ -549,28 +536,23 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
 | D-043 | `Expense.concept` es obligatorio. Motivo: deja registrados los lugares para cuando se repita el viaje. | 2026-10-24 |
 | D-044 | `Activity`: obligatorios `title`, `date`, `startTime`, `endTime`, `location`, `estimatedCost`; `type` opcional. | 2026-10-24 |
 | D-045 | `Trip.preferences` es opcional. Resuelve Q-01. | 2026-10-24 |
-| ~~D-046~~ | **Obsoleta por D-094.** Los gastos desasociados por acortar el viaje (REQ-F-13A) **sí cuentan** en `TotalTripSpent`. Pueden pasar a `OTHER`; mecanismo definido en D-048. | 2026-10-24 |
 | D-047 | `Activity.endTime` > `Activity.startTime`. | 2026-10-24 |
-| ~~D-048~~ | **Obsoleta por D-094.** Gastos desasociados: el cliente decide por cada uno si pasa a `OTHER` o se elimina, dentro del aviso de REQ-F-13A. Resuelve Q-31. | 2026-10-24 |
 | D-049 | `Activity.estimatedCost` admite 0. Motivo: una actividad es planificación, no dinero gastado; registrar actividades gratuitas sirve para viajes futuros. Resuelve Q-32. | 2026-10-24 |
 | D-050 | `Activity.estimatedCost` se compara con `activitiesTotal`: la UI muestra lo planificado vs el presupuesto, con alerta visual si se excede (sin bloqueo). Respaldo: `[PDF §3]` "Planificación Anticipada". Resuelve Q-10. | 2026-10-24 |
-| D-051 | Montos en USD se guardan como centavos enteros; UI con 2 decimales; redondeo al centavo en divisiones y conversiones; tasa con todos sus decimales. Modifica el contrato de datos. Resuelve Q-11. | 2026-10-24 |
-| D-052 | `Expense.originalAmount` se guarda en decimal tal como lo ingresa el cliente; es solo referencia y no participa en cálculos. Resuelve Q-33. | 2026-10-24 |
+| D-051 | Montos en USD se guardan como centavos enteros; UI con 2 decimales; redondeo al centavo en divisiones. Modifica el contrato de datos. Resuelve Q-11. | 2026-10-24 |
 | D-053 | Redondeo al centavo: mitad hacia arriba (0.005 → 0.01). Resuelve Q-34. | 2026-10-24 |
 | D-054 | El cliente puede registrar, editar y eliminar gastos de días anteriores del viaje, con su fecha real. Los límites de los días siguientes se ajustan con D-007. "Histórico" = los `DailyForecastAlert` generados, que no se modifican. Motivo: que la información sea correcta. Resuelve Q-08. Requiere ampliar REQ-F-03 (Q-35). | 2026-10-24 |
 | D-055 | Se define REQ-F-03 (`docs/requirements.md`). Un gasto solo puede tener fecha dentro del viaje y no futura. Resuelve Q-35. | 2026-10-24 |
 | D-056 | Se permite registrar, editar y eliminar gastos con el viaje en `FINISHED` (para corregir olvidos); solo actualiza `TotalTripSpent`. | 2026-10-24 |
-| D-057 | **Duplicar viaje:** se copian `place`, `country`, `preferences`, divisa, montos por categoría, `ExpenseCap`, tiquetes, hospedaje, fondo de imprevistos y actividades (con día relativo; fechas recalculadas desde el nuevo `startDate`). No se copian fechas, gastos ni `DailyForecastAlert`. La tasa del presupuesto se prellena con la del viaje original y es editable (D-096). El nuevo viaje inicia en `PLANNED`. El viaje original queda disponible para consulta. Las actividades copiadas son editables como cualquier otra. Resuelve Q-12. *(Estado y tasa ajustados por D-095 y D-096.)* | 2026-10-24 |
+| D-057 | **Duplicar viaje:** se copian `place`, `country`, `preferences`, montos por categoría, `ExpenseCap`, tiquetes, hospedaje, fondo de imprevistos y actividades (con día relativo; fechas recalculadas desde el nuevo `startDate`). No se copian fechas, gastos ni `DailyForecastAlert`. El estado del nuevo viaje se asigna según sus fechas (D-095). El viaje original queda disponible para consulta. Las actividades copiadas son editables como cualquier otra. Resuelve Q-12. *(Estado ajustado por D-095.)* | 2026-10-24 |
 | D-058 | Al duplicar en un viaje más corto, solo se copian las actividades que caben en los nuevos días y se notifica al cliente cuáles quedaron fuera. | 2026-10-24 |
 | D-059 | Se define REQ-F-19 "Duplicar viaje" (`docs/requirements.md`). El nombre del nuevo viaje se prellena como "Copia de {nombre original}" y es editable. Resuelve Q-36. | 2026-10-24 |
 | D-060 | Diseño **mobile-first y responsive**: prioridad celular, pero debe verse bien en computadora. | 2026-10-24 |
 | D-061 | Navegación: opción A (pestañas Hoy, Itinerario, Gastos, Resumen dentro de cada viaje, + registrar gasto, Ajustes) con la pestaña inicial según el estado del viaje (tomado de la opción B). Comportamiento responsive según sección 7.1. Resuelve Q-07. | 2026-10-24 |
 | D-062 | Pantalla "Hoy" según sección 7.2: resumen matutino, total disponible, tarjeta por categoría ("Te quedan $X de $Y"), actividades del día; variantes para `PLANNED` y `FINISHED`. Resuelve Q-15. | 2026-10-24 |
-| D-063 | El curso no permite servicios externos. La tasa de cambio la ingresa manualmente el cliente. Reemplaza D-030. Resuelve Q-26. | 2026-10-24 |
-| D-064 | Tasa manual por viaje y divisa, prellenada con la última usada y editable en cada registro; USD no pide tasa. Se define REQ-F-01A. Resuelve Q-37. El ejemplo "1 EUR = 1.08 USD" queda sustituido por el formato de D-067. | 2026-10-24 |
+| D-063 | El curso no permite servicios externos en tiempo de ejecución. Resuelve Q-26. | 2026-10-24 |
 | D-065 | Opción a: el límite del día se recalcula de inmediato cuando cambian los gastos de días anteriores o el monto de una categoría; nunca por los gastos del mismo día. Ajusta D-007 ("fijo durante el día") y la 2.ª cláusula de REQ-F-03. Motivo: un aumento de presupuesto debe poder usarse desde hoy. Resuelve Q-38. | 2026-10-24 |
 | D-066 | Se define el flujo "Registrar gasto" (sección 8.1) con: G1 botón desactivado en `PLANNED`; G2 tope siempre, disponible contra el de hoy, en `FINISHED` solo tope; G3 sin fondo creado no se guarda el gasto `OTHER`. | 2026-10-24 |
-| D-067 | Formato de la tasa: "1 USD = X {divisa}" (como se publica el tipo de cambio, p. ej. 1 USD = 510 CRC). Conversión: USD = monto ÷ X. El formulario muestra el formato explícito. Resuelve Q-39. | 2026-10-24 |
 | D-068 | El recordatorio inicia en ON al crear un viaje; al activarse se solicita el permiso de notificaciones del navegador. Si se rechaza, el resumen igual se muestra al abrir la app (D-035). | 2026-10-24 |
 | D-069 | No se permite crear ni duplicar viajes con `startDate` en el pasado, para evitar errores en otros pasos. Para repetir un viaje anterior se duplica y se ingresan fechas nuevas. Motivo adicional: a los viajes pasados les faltarían detalles y afectarían la información futura. | 2026-10-24 |
 | D-070 | Se define el flujo "Crear viaje" en 3 pasos: Datos, Presupuesto, Recordatorio (sección 8.2). | 2026-10-24 |
@@ -583,7 +565,6 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
 | D-077 | Se permiten actividades con horarios que se cruzan, sin aviso. | 2026-10-24 |
 | D-078 | Las actividades se pueden crear, editar y eliminar también con el viaje `FINISHED`. Flujo "Gestionar actividades" definido (sección 8.6). | 2026-10-24 |
 | D-079 | Bajar el monto de una categoría por debajo de lo ya gastado se permite con la confirmación única. | 2026-10-24 |
-| D-080 | La divisa del presupuesto queda fija tras crear el viaje; las ediciones usan esa divisa con tasa prellenada y editable. | 2026-10-24 |
 | D-081 | En `PLANNED` todo el presupuesto es editable; en `FINISHED` queda bloqueado. Flujo "Editar presupuesto" definido (sección 8.7). | 2026-10-24 |
 | D-082 | El `DailyForecastAlert` guarda el disponible al momento de generarse. | 2026-10-24 |
 | D-083 | Plantilla de `assistantMessage` basada en `[PDF §4]`. Flujo "Resumen matutino" definido (sección 8.8). | 2026-10-24 |
@@ -597,12 +578,10 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
 | D-091 | Pantalla "Resumen" definida (sección 7.6). | 2026-10-24 |
 | D-092 | Pantalla "Ajustes" definida (sección 7.7). | 2026-10-24 |
 | D-093 | Los datos descriptivos del viaje (`name`, `place`, `country`, `preferences`) son editables en cualquier estado. | 2026-10-24 |
-| D-094 | Los gastos nunca quedan fuera del rango del viaje (consecuencia de D-055 y D-071). Se eliminan `Expense.isDetached`, la sección "Fuera del viaje" de Gastos e INV-23; D-046 y D-048 quedan obsoletas; REQ-F-13A aplica solo a actividades. Resuelve Q-41. | 2026-10-24 |
+| D-094 | Los gastos nunca quedan fuera del rango del viaje (consecuencia de D-055 y D-071). No existe `Expense.isDetached` ni sección "Fuera del viaje" en Gastos; REQ-F-13A aplica solo a actividades. Resuelve Q-41. | 2026-10-24 |
 | D-095 | El estado de un viaje duplicado se asigna según sus fechas (D-032), igual que al crearlo. Ajusta REQ-F-19 y D-057. Resuelve Q-42. | 2026-10-24 |
-| D-096 | Los montos de `GlobalBudget` se guardan en la divisa original junto con su tasa; los USD se derivan. Cambiar la tasa reconvierte todo el presupuesto; los gastos conservan la suya. Al duplicar, la tasa se prellena con la del original y es editable. Resuelve Q-43. | 2026-10-24 |
 | D-097 | `dailyFoodLimit`, `dailyTransportLimit` y `dailyActivitiesLimit` se quitan del contrato: son derivados. Resuelve Q-44. | 2026-10-24 |
 | D-098 | Excepción a D-081: con el viaje `FINISHED`, el fondo de imprevistos se puede crear o ajustar únicamente desde el aviso de un gasto `OTHER` (D-031). Resuelve Q-45. | 2026-10-24 |
-| D-099 | Gastos y presupuestos en USD: `originalCurrency = "USD"`, `originalAmount` = monto, `exchangeRate = 1`. Resuelve Q-46. | 2026-10-24 |
 | D-100 | El día cambia a las 00:00 (hora local) para límites, estado y fechas de gastos; las 08:00 solo marcan el resumen. `DailyForecastAlert.sendTime` se reemplaza por `generatedAt`. Resuelve Q-47. | 2026-10-24 |
 
 | D-101 | Arquitectura en capas (UI, Estado, Aplicación, Dominio, Infraestructura) con puertos `Clock`, `NotificationPort`, `IdGenerator` y repositorios (`docs/design.md` §2). | 2026-10-24 |
@@ -620,7 +599,15 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
 | D-113 | Sin herramienta de build: `index.html` carga módulos ES nativos de JavaScript. La app se abre con un servidor local (p. ej. Live Server de VS Code), no con doble clic. Resuelve Q-49. | 2026-10-24 |
 | D-114 | El producto se llama **"Asistente de Viajes"**: se quita "IA" del nombre, ya que no tiene funcionalidad de inteligencia artificial (D-033). | 2026-10-24 |
 | D-115 | `totalAmount` se quita del contrato de datos: es la suma de las categorías y, por D-103, no se persiste. Sigue existiendo como valor calculado. Resuelve Q-52. | 2026-10-24 |
+| D-116 | `docs/design.md`: la arquitectura tiene **cinco** capas (UI, Estado, Aplicación, Dominio, Infraestructura) y la regla de dependencias incluye `application → state` y `state → domain`, como ya mostraba el diagrama. | 2026-10-24 |
+| D-117 | `Activity.dayNumber` se quita del contrato: es derivable (`date − startDate + 1`) y, por D-103, no se persiste. | 2026-10-24 |
+| D-120 | **Solo USD:** todos los montos (presupuesto, topes, gastos y costos de actividades) se ingresan y guardan en USD. No se aceptan otras divisas ni hay tasa de cambio o conversión. Resuelve Q-54. | 2026-10-24 |
+| D-121 | Consecuencia de D-120: los montos de `GlobalBudget` y `Activity.estimatedCost` también se guardan en centavos enteros USD, igual que `Expense.amount` (D-051). | 2026-10-24 |
+| D-122 | Navegación con **router por hash** (`#/trip/{id}/today`…): funciona con Live Server sin configuración, conserva la pantalla al recargar y habilita Atrás/Adelante. | 2026-10-24 |
+| D-123 | **Fecha simulada para pruebas manuales:** `SystemClock` acepta `?today=YYYY-MM-DD&time=HH:MM` en la URL; sin parámetros usa la fecha real. Apoya la verificación manual (D-112) de estados, rollover y resumen de las 08:00. | 2026-10-24 |
 > **Revisión de consistencia (2026-10-24):** se corrigieron sin cambio de contenido: mapeo de sección 7 a contrato de datos, referencia de Q-02, condición de notificación en 8.8, texto de confirmación en 8.9, `Activity.type` nullable, filtro de desasociadas en 7.4 y lista completa de motivos en INV-15. Hallazgos que requieren decisión: Q-41 a Q-47.
+>
+> **Revisión de consistencia (2026-10-24, plan de desarrollo):** D-057 actualizado al estado según fechas (D-095); precondición de REQ-F-18 alineada con D-031/D-098; D-116, D-117, D-120 y D-121.
 
 ---
 
@@ -641,7 +628,7 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
 | ID | Pregunta | Afecta |
 |---|---|---|
 | ~~Q-01~~ | **Resuelto por D-043, D-044 y D-045.** | — |
-| ~~Q-02~~ | **Resuelto por D-063** (antes D-030, reemplazada). | — |
+| ~~Q-02~~ | **Resuelto por D-063 y D-120.** | — |
 | ~~Q-03~~ | **Resuelto por D-020.** | — |
 | ~~Q-04~~ | **Resuelto por D-029.** | — |
 | ~~Q-05~~ | **Resuelto por D-034.** | — |
@@ -665,27 +652,21 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
 | ~~Q-24~~ | **Resuelto por D-031.** | — |
 | ~~Q-25~~ | **Resuelto por D-032.** | — |
 | ~~Q-26~~ | **Resuelto por D-063.** | — |
-| ~~Q-37~~ | **Resuelto por D-064.** | — |
 | ~~Q-27~~ | **Resuelto por D-036.** | — |
 | ~~Q-28~~ | **Resuelto por D-035.** | — |
 | ~~Q-29~~ | **Resuelto por D-038, D-039, D-040 y D-041.** | — |
 | ~~Q-30~~ | **Resuelto por D-042.** Ubicación en la UI: se define con Q-07/Q-15. | — |
-| ~~Q-31~~ | **Resuelto por D-048.** | — |
 | ~~Q-32~~ | **Resuelto por D-049.** | — |
-| ~~Q-33~~ | **Resuelto por D-052.** | — |
 | ~~Q-34~~ | **Resuelto por D-053.** | — |
 | ~~Q-35~~ | **Resuelto por D-055 y D-056.** | — |
 | ~~Q-36~~ | **Resuelto por D-059.** | — |
 | ~~Q-15~~ | **Resuelto por D-062.** | — |
 | ~~Q-38~~ | **Resuelto por D-065.** | — |
-| ~~Q-39~~ | **Resuelto por D-067.** | — |
 | ~~Q-40~~ | **Resuelto por D-087.** | — |
 | ~~Q-41~~ | **Resuelto por D-094.** | — |
 | ~~Q-42~~ | **Resuelto por D-095.** | — |
-| ~~Q-43~~ | **Resuelto por D-096.** | — |
 | ~~Q-44~~ | **Resuelto por D-097.** | — |
 | ~~Q-45~~ | **Resuelto por D-098.** | — |
-| ~~Q-46~~ | **Resuelto por D-099.** | — |
 | ~~Q-47~~ | **Resuelto por D-100.** | — |
 | ~~Q-48~~ | **Resuelto por D-109.** | — |
 | ~~Q-49~~ | **Resuelto por D-110 y D-113.** | — |
@@ -693,3 +674,4 @@ Mismo formulario, validación, verificaciones, confirmación única y recálculo
 | ~~Q-51~~ | **Resuelto por D-111.** | — |
 | ~~Q-52~~ | **Resuelto por D-115.** | — |
 | ~~Q-53~~ | **Resuelto:** `retrospective.md` redactado. | — |
+| ~~Q-54~~ | **Resuelto por D-120** (solo USD). | — |

@@ -16,20 +16,20 @@
 
 ## 1. Gestión de Presupuesto y Conversión
 
-### REQ-F-01A: Conversión de Divisa y Cálculo de Duración Total
+### REQ-F-01A: Cálculo de Duración Total
 * **Tipo:** Ubicuo / Evento
 * **Disparador:** Guardado o modificación de la información general del viaje.
 * **Precondición:** El viaje cuenta con fechas válidas.
 * **Sintaxis EARS:**
-  > **WHEN** el usuario guarde o modifique la información general del viaje, **IF** el presupuesto está ingresado en una divisa diferente a USD, **THEN** el sistema debe convertir los montos a USD aplicando la tasa de cambio **ingresada por el cliente** y calcular la duración total del viaje ($\text{Días Totales} = \text{Fecha Fin} - \text{Fecha Inicio} + 1$).
-* **Nota:** la tasa se expresa como "1 USD = X {divisa}" y la conversión es `USD = monto ÷ X` (D-067). Los montos del presupuesto se guardan en la divisa original y su equivalente en USD se calcula (D-096).
+  > **WHEN** el usuario guarde o modifique la información general del viaje, **THEN** el sistema debe calcular la duración total del viaje ($\text{Días Totales} = \text{Fecha Fin} - \text{Fecha Inicio} + 1$).
+* **Nota:** todos los montos se ingresan y se guardan en USD; no se aceptan otras divisas ni hay conversión (D-120).
 
 ### REQ-F-01B: Distribución Presupuestaria por Categoría
 * **Tipo:** Evento
-* **Disparador:** Finalización del cálculo de conversión de divisa y días totales.
+* **Disparador:** Finalización del cálculo de días totales.
 * **Precondición:** La duración del viaje es mayor a cero días.
 * **Sintaxis EARS:**
-  > **WHEN** el presupuesto consolidado en USD y los días totales del viaje sean confirmados, **THEN** el sistema debe calcular el límite diario de cada categoría dividiendo el monto asignado a dicha categoría entre los días totales del viaje.
+  > **WHEN** el presupuesto en USD y los días totales del viaje sean confirmados, **THEN** el sistema debe calcular el límite diario de cada categoría dividiendo el monto asignado a dicha categoría entre los días totales del viaje.
 * **Nota:** aplica a las categorías diarias: Comida, Transporte y Actividades (D-010). Es el caso del día 1 de la fórmula general de D-007.
 
 ---
@@ -105,7 +105,7 @@
 * **Precondición:** Campo de entrada numérico enfocado.
 * **Sintaxis EARS:**
   > **WHEN** el usuario introduzca un monto menor o igual a cero ($\text{Monto} \le 0$) en un campo de presupuesto o gasto, **THEN** el sistema debe denegar el registro y notificar que solo se admiten valores numéricos positivos.
-* **Nota:** también aplica a `ExpenseCap` (D-014) y a la tasa de cambio (INV-18). No aplica al costo estimado de actividades, que admite 0 (INV-22).
+* **Nota:** también aplica a `ExpenseCap` (D-014). No aplica al costo estimado de actividades, que admite 0 (INV-22).
 
 ---
 
@@ -133,7 +133,7 @@
 ### REQ-F-18: Imputación de Gastos en "Otros / Imprevistos"
 * **Tipo:** Evento
 * **Disparador:** Registro de un gasto asignado a la categoría secundaria "Otros / Imprevistos".
-* **Precondición:** Existe fondo asignado a imprevistos.
+* **Precondición:** El viaje está en estado `IN_PROGRESS` o `FINISHED`.
 * **Sintaxis EARS:**
   > **WHEN** el usuario confirme un gasto bajo la categoría "Otros / Imprevistos", **THEN** el sistema debe descontar el monto directamente del fondo global de reserva/imprevistos sin alterar los balances ni las cuotas diarias de las categorías principales.
 * **Nota:** si el fondo no existe, la app pide crearlo en ese momento, también con el viaje `FINISHED` (D-031, D-098). Si el gasto deja el fondo en negativo, se pide confirmación (INV-19).
@@ -146,7 +146,7 @@
   > **WHEN** el cliente duplique un viaje e ingrese un nombre (prellenado como "Copia de {nombre original}", editable) y nuevas fechas válidas (REQ-F-05, con `startDate` ≥ hoy según INV-28 y sin cruce con otros viajes según INV-29), **THEN** el sistema debe crear un viaje nuevo, en el estado que corresponda a sus fechas, con los datos copiables definidos en D-057, recalculando la fecha de cada actividad a partir del nuevo `startDate`.
 
   > **WHEN** la duración del nuevo viaje sea menor que la del original, **THEN** el sistema debe copiar solo las actividades cuyo día relativo exista en el nuevo viaje y notificar al cliente el listado de las actividades excluidas.
-* **Origen:** D-057, D-058, D-059, D-095, D-096.
+* **Origen:** D-057, D-058, D-059, D-095.
 
 ### REQ-F-20: Eliminar Viaje
 * **Tipo:** Evento
@@ -167,7 +167,7 @@
 | RNF-01 | Los datos se persisten exclusivamente en el LocalStorage del navegador; no hay backend ni autenticación. | D-001, D-016 |
 | RNF-02 | La aplicación no consume servicios externos en tiempo de ejecución. | D-063 |
 | RNF-03 | La interfaz es mobile-first y responsive. | D-060 |
-| RNF-04 | Los cálculos monetarios se hacen en centavos enteros de USD, con redondeo mitad hacia arriba. | D-051, D-053 |
+| RNF-04 | Todos los montos son en USD (no se aceptan otras divisas) y se guardan en centavos enteros, con redondeo mitad hacia arriba en las divisiones. | D-051, D-053, D-120, D-121 |
 | RNF-05 | El código y el contrato de datos van en inglés; la interfaz, en español. | D-019 |
 | RNF-06 | La lógica de dominio no accede directamente a LocalStorage; usa repositorios. | D-018, D-101 |
 | RNF-07 | Lenguaje de implementación: JavaScript, sin framework de UI ni herramienta de build (módulos ES nativos servidos con un servidor local). | D-107, D-110, D-113 |
