@@ -27,7 +27,7 @@
 | `docs/tasks.md` | Plan de implementación por fases, con la regla de comportamiento sin cambios y la verificación final de cada requerimiento. |
 | `src/`, `index.html`, `styles.css` | Código de la aplicación (JavaScript con módulos ES, sin build). |
 | `README.md` | Resumen del proyecto, tecnología, estructura y cómo ejecutar. |
-| `retrospective.md` | Respuestas a las preguntas de reflexión del curso. |
+| `docs/retrospective.md` · `docs/retrospective-parte2.md` | Respuestas a las preguntas de reflexión del curso (Parte 1 y Parte 2). |
 | Boceto visual (imagen de 4 pantallas) | **Solo referencia visual.** Contiene elementos ajenos al proyecto; no es fuente de requisitos. `[Autor]` |
 
 ---

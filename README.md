@@ -74,9 +74,10 @@ El tiempo sigue avanzando desde esa hora. Mientras la fecha está simulada apare
 │   ├── data-contract.json   # Contrato de datos JSON/TS (Semana 2)
 │   ├── wireframe.md         # Bocetos de interfaz (Semana 2)
 │   ├── design.md            # ENTREGABLE PRINCIPAL: Documento de diseño y arquitectura
-│   └── tasks.md             # Plan de implementación por fases y verificación final
-├── README.md                # Resumen y descripción del proyecto
-└── retrospective.md         # Respuestas a las preguntas de reflexión
+│   ├── tasks.md             # Plan de implementación por fases y verificación final
+│   ├── retrospective.md         # Retrospectiva de la Parte 1 (especificación y diseño)
+│   └── retrospective-parte2.md  # Retrospectiva de la Parte 2 (implementación)
+└── README.md                # Resumen y descripción del proyecto
 ```
 
 ## Documentación
@@ -89,6 +90,8 @@ El tiempo sigue avanzando desde esa hora. Mientras la fecha está simulada apare
 | [`docs/wireframe.md`](docs/wireframe.md) | Cómo se ve cada pantalla |
 | [`docs/design.md`](docs/design.md) | Cómo se construye y cómo cada requerimiento se cumple en el diseño |
 | [`docs/tasks.md`](docs/tasks.md) | Plan de implementación por fases y verificación final de cada requerimiento |
+| [`docs/retrospective.md`](docs/retrospective.md) | Retrospectiva de la Parte 1: especificación y diseño |
+| [`docs/retrospective-parte2.md`](docs/retrospective-parte2.md) | Retrospectiva de la Parte 2: implementación |
 
 ## Autor
 
