@@ -1,5 +1,12 @@
 # Asistente de Viajes
 
+🔗 **App en línea:** https://kfallas95.github.io/lab-3-part1---asistente-de-viajes/
+
+> **Nota — fecha simulada:** para probar cómo se comporta la app en otro día (el cambio de día a las 00:00, los estados del viaje o el resumen matutino de las 08:00) sin esperar, agrega `?today=AAAA-MM-DD` (y opcionalmente `&time=HH:MM`) a la dirección, antes del `#`. Por ejemplo:
+> https://kfallas95.github.io/lab-3-part1---asistente-de-viajes/?today=2026-11-06&time=07:59
+>
+> El tiempo sigue avanzando desde esa hora y arriba aparece un aviso amarillo con el enlace **Volver a la fecha real**. Los datos se guardan en tu navegador (LocalStorage), así que cada persona empieza con la app vacía. Más detalles en [Probar con otra fecha](#probar-con-otra-fecha-d-123).
+
 Aplicación web para **planificar viajes y controlar el presupuesto día a día** mientras se viaja. El cliente define un presupuesto por categoría y la app le dice cada día cuánto puede gastar en Comida, Transporte y Actividades. Lo que sobra o falta en un día se reparte automáticamente entre los días restantes.
 
 ## Estado del proyecto
